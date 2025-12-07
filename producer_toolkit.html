@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Producer Toolkit</title>
+
+  <!-- Mobile / app-like behaviour -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card-bg: #ffffff;
+      --border: #d3d3dd;
+      --text-main: #111111;
+      --text-muted: #666666;
+      --accent: #3b82f6;
+      --accent-soft: #e0edff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    header {
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      margin: 0 0 4px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-button.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: #0b3a8c;
+      font-weight: 600;
+    }
+
+    /* Panels */
+    .panel {
+      display: none;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 14px 14px 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin: 0 0 6px;
+    }
+
+    .panel-description {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0 0 10px;
+    }
+
+    button {
+      padding: 7px 14px;
+      font-size: 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: #ffffff;
+      color: var(--text-main);
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    button.primary:hover {
+      filter: brightness(0.95);
+    }
+
+    button:not(.primary):hover {
+      background: #f0f0f0;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #ffffff;
+    }
+
+    .card-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .card-content {
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      padding: 8px 9px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      margin-top: 8px;
+    }
+
+    .export-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      min-height: 1em;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding-top: 16px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Producer Toolkit</h1>
+    <p class="subtitle">Tap a tab, hit generate, and let the constraints shape the track.</p>
+  </header>
+
+  <!-- Tab buttons -->
+  <nav class="tabs">
+    <button class="tab-button active" data-tab="fill" onclick="showTab('fill')">Drum Fills</button>
+    <button class="tab-button" data-tab="groove" onclick="showTab('groove')">Drum Grooves</button>
+    <button class="tab-button" data-tab="palette" onclick="showTab('palette')">Sound Palette</button>
+    <button class="tab-button" data-tab="texture" onclick="showTab('texture')">Textures / Atmos</button>
+    <button class="tab-button" data-tab="arrange" onclick="showTab('arrange')">Arrangement</button>
+    <button class="tab-button" data-tab="workflow" onclick="showTab('workflow')">Daily Workflow</button>
+  </nav>
+
+  <!-- Drum Fill Generator -->
+  <section class="panel active" id="panel-fill">
+    <h2>Drum Fill Generator</h2>
+    <p class="panel-description">Build fills from concepts instead of memorised patterns. Great for 1/4, 1/2 or 1-bar fills.</p>
+    <button class="primary" onclick="generateFill()">Generate Drum Fill</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-title">Structure</div>
+        <p class="card-content" id="fill-structure"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Rate / Rhythm</div>
+        <p class="card-content" id="fill-rate"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Timbre</div>
+        <p class="card-content" id="fill-timbre"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Space / Density</div>
+        <p class="card-content" id="fill-space"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">FX</div>
+        <p class="card-content" id="fill-fx"></p>
+      </div>
+    </div>
+
+    <textarea id="fill-export" placeholder="Click “Export Fill Recipe” to dump this combo here."></textarea>
+    <div class="export-row">
+      <button onclick="exportFill()">Export Fill Recipe</button>
+      <button onclick="copyText('fill-export','fill-status')">Copy</button>
+    </div>
+    <div class="status" id="fill-status"></div>
+    <p class="note">Try to commit to each combo for a few minutes before rerolling. Treat it like a mini game.</p>
+  </section>
+
+  <!-- Drum Groove Generator -->
+  <section class="panel" id="panel-groove">
+    <h2>Drum Groove Generator</h2>
+    <p class="panel-description">Use this to design your core drum loop before touching samples. Especially good for organic house / downtempo.</p>
+    <button class="primary" onclick="generateGroove()">Generate Groove</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-title">Kick Pattern</div>
+        <p class="card-content" id="groove-kick"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Snare / Clap</div>
+        <p class="card-content" id="groove-snare"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Hats / Top</div>
+        <p class="card-content" id="groove-hats"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Percussion</div>
+        <p class="card-content" id="groove-perc"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Human Feel</div>
+        <p class="card-content" id="groove-human"></p>
+      </div>
+    </div>
+
+    <textarea id="groove-export" placeholder="Click “Export Groove Recipe” to capture this groove plan."></textarea>
+    <div class="export-row">
+      <button onclick="exportGroove()">Export Groove Recipe</button>
+      <button onclick="copyText('groove-export','groove-status')">Copy</button>
+    </div>
+    <div class="status" id="groove-status"></div>
+  </section>
+
+  <!-- Sound Palette Generator -->
+  <section class="panel" id="panel-palette">
+    <h2>Sound Palette Generator</h2>
+    <p class="panel-description">Choose the sonic identity of the track before you start. This stops endless preset browsing.</p>
+    <button class="primary" onclick="generatePalette()">Generate Palette</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-title">Lead / Main Voice</div>
+        <p class="card-content" id="pal-lead"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Bass Character</div>
+        <p class="card-content" id="pal-bass"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Drum Tone</div>
+        <p class="card-content" id="pal-drums"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">FX & Space</div>
+        <p class="card-content" id="pal-fx"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Ambient Bed</div>
+        <p class="card-content" id="pal-bed"></p>
+      </div>
+    </div>
+
+    <textarea id="palette-export" placeholder="Export this palette and pin it in your project notes."></textarea>
+    <div class="export-row">
+      <button onclick="exportPalette()">Export Palette</button>
+      <button onclick="copyText('palette-export','palette-status')">Copy</button>
+    </div>
+    <div class="status" id="palette-status"></div>
+  </section>
+
+  <!-- Texture / Atmos Generator -->
+  <section class="panel" id="panel-texture">
+    <h2>Texture / Atmos Generator</h2>
+    <p class="panel-description">For evolving pads, noise beds, and risers built from everyday sounds.</p>
+    <button class="primary" onclick="generateTexture()">Generate Texture Plan</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-title">Source Material</div>
+        <p class="card-content" id="tex-source"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Time Manipulation</div>
+        <p class="card-content" id="tex-time"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Movement</div>
+        <p class="card-content" id="tex-move"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Processing Chain</div>
+        <p class="card-content" id="tex-chain"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Role in Track</div>
+        <p class="card-content" id="tex-role"></p>
+      </div>
+    </div>
+
+    <textarea id="texture-export" placeholder="Export the texture recipe so you can recreate it later."></textarea>
+    <div class="export-row">
+      <button onclick="exportTexture()">Export Texture</button>
+      <button onclick="copyText('texture-export','texture-status')">Copy</button>
+    </div>
+    <div class="status" id="texture-status"></div>
+  </section>
+
+  <!-- Arrangement Expander -->
+  <section class="panel" id="panel-arrange">
+    <h2>Arrangement Expander</h2>
+    <p class="panel-description">When you’re stuck in an 8-bar loop, use this to decide how the track evolves.</p>
+    <button class="primary" onclick="generateArrangement()">Generate Arrangement Move</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-title">Section Change</div>
+        <p class="card-content" id="arr-section"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Energy Shift</div>
+        <p class="card-content" id="arr-energy"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Drum Variation</div>
+        <p class="card-content" id="arr-drums"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Harmony / Melody</div>
+        <p class="card-content" id="arr-harmony"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Transition Trick</div>
+        <p class="card-content" id="arr-transition"></p>
+      </div>
+    </div>
+
+    <textarea id="arrange-export" placeholder="Export this as an arrangement TODO list for the project."></textarea>
+    <div class="export-row">
+      <button onclick="exportArrangement()">Export Arrangement Plan</button>
+      <button onclick="copyText('arrange-export','arrange-status')">Copy</button>
+    </div>
+    <div class="status" id="arrange-status"></div>
+  </section>
+
+  <!-- Daily Workflow -->
+  <section class="panel" id="panel-workflow">
+    <h2>Daily Studio Workflow</h2>
+    <p class="panel-description">A mini “training session” generator for when you sit down to make music and don’t know where to start.</p>
+    <button class="primary" onclick="generateWorkflow()">Generate Today’s Session</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-title">Warm-Up</div>
+        <p class="card-content" id="wf-warmup"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Core Creation Task</div>
+        <p class="card-content" id="wf-core"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Skill Practice</div>
+        <p class="card-content" id="wf-skill"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Finishing / Admin</div>
+        <p class="card-content" id="wf-finish"></p>
+      </div>
+      <div class="card">
+        <div class="card-title">Reflection</div>
+        <p class="card-content" id="wf-reflect"></p>
+      </div>
+    </div>
+
+    <textarea id="workflow-export" placeholder="Use this as your checklist for today’s session."></textarea>
+    <div class="export-row">
+      <button onclick="exportWorkflow()">Export Session Plan</button>
+      <button onclick="copyText('workflow-export','workflow-status')">Copy</button>
+    </div>
+    <div class="status" id="workflow-status"></div>
+  </section>
+
+  <script>
+    // ----- Utility -----
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function copyText(textareaId, statusId) {
+      var area = document.getElementById(textareaId);
+      if (!area.value.trim()) {
+        // nothing to copy
+        document.getElementById(statusId).textContent = "Nothing to copy yet.";
+        return;
+      }
+      area.select();
+      try {
+        var ok = document.execCommand("copy");
+        document.getElementById(statusId).textContent = ok ? "Copied to clipboard ✔" : "Could not copy automatically, but text is selected.";
+      } catch (e) {
+        document.getElementById(statusId).textContent = "Copy failed in this browser, but text is selected.";
+      }
+    }
+
+    function showTab(name) {
+      // buttons
+      var buttons = document.querySelectorAll(".tab-button");
+      buttons.forEach(function(btn) {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
+      });
+
+      // panels
+      var panels = document.querySelectorAll(".panel");
+      panels.forEach(function(panel) {
+        panel.classList.toggle("active", panel.id === "panel-" + name);
+      });
+    }
+
+    // ----- Drum Fill Generator -----
+    var fillStructure = [
+      "1/4-bar microfill right before the drop",
+      "1/2-bar fill at the end of the phrase",
+      "1-bar fill leading into a new section",
+      "Microfill just before the snare on beat 4",
+      "Stop-everything fill: full bar of tension then slam on 1",
+      "Tiny pick-up fill using the last 2 beats only"
+    ];
+
+    var fillRate = [
+      "1/8 → 1/16 acceleration across the fill",
+      "Triplet burst then resolve back to straight 1/8",
+      "3-note groupings over 4/4 (3-3-3-3 feel)",
+      "Ratchet one element (e.g. hat) into 1/32 on the last beat",
+      "Busy → minimal, thinning hits towards beat 1",
+      "Shift the last snare/clap early by a few ms for a pulled feel"
+    ];
+
+    var fillTimbre = [
+      "Tuned tom run with melodic movement",
+      "Foley clicks / paper crinkle as high percussion",
+      "Noise burst shaped with a filter envelope",
+      "Dry rimshot + clap stack as the main voice",
+      "Mallet / marimba-style hits as a percussive melody",
+      "Seed shaker or small hand percussion chopped into hits",
+      "Reverse cymbal or whoosh layered behind each hit"
+    ];
+
+    var fillSpace = [
+      "Remove the kick entirely in the fill bar",
+      "Mute hats: only toms / perc and silence",
+      "Leave the last half-beat completely empty before the drop",
+      "Mono, dry fill after a wide, wet groove",
+      "Ghost notes swelling in density towards beat 1",
+      "Low-only fill (sub + toms) with no highs",
+      "High-only fill (hats / clicks) with no lows"
+    ];
+
+    var fillFx = [
+      "Single delay throw on one key hit (1/8 or 1/4 note)",
+      "Reverse reverb swell into the downbeat",
+      "Low-pass filter sweep down, then hard open on 1",
+      "Short grain delay stutter on a clap or tom",
+      "Resonator tuned to 5ths on a noise burst",
+      "Freeze a reverb tail, resample, then chop it as fill material",
+      "Subtle phaser or flanger moving across the fill only"
+    ];
+
+    function generateFill() {
+      document.getElementById("fill-structure").textContent = pickRandom(fillStructure);
+      document.getElementById("fill-rate").textContent = pickRandom(fillRate);
+      document.getElementById("fill-timbre").textContent = pickRandom(fillTimbre);
+      document.getElementById("fill-space").textContent = pickRandom(fillSpace);
+      document.getElementById("fill-fx").textContent = pickRandom(fillFx);
+      document.getElementById("fill-status").textContent = "";
+    }
+
+    function exportFill() {
+      var lines = [
+        "Drum Fill Recipe:",
+        "- Structure: " + (document.getElementById("fill-structure").textContent || "(none)"),
+        "- Rate / Rhythm: " + (document.getElementById("fill-rate").textContent || "(none)"),
+        "- Timbre: " + (document.getElementById("fill-timbre").textContent || "(none)"),
+        "- Space / Density: " + (document.getElementById("fill-space").textContent || "(none)"),
+        "- FX: " + (document.getElementById("fill-fx").textContent || "(none)")
+      ];
+      document.getElementById("fill-export").value = lines.join("\n");
+      document.getElementById("fill-status").textContent = "Export updated.";
+    }
+
+    // ----- Groove Generator -----
+    var grooveKick = [
+      "Four-on-the-floor with occasional skip on bar 4",
+      "Broken kick pattern with gaps on beat 3",
+      "Sparse kicks only on 1 and the '&' of 3",
+      "Syncopated pattern: 1, 2&, 3&, 4",
+      "Half-time kick pattern for laid-back groove",
+      "Steady 4/4 in verse, add ghost kicks in pre-drop"
+    ];
+
+    var grooveSnare = [
+      "Standard 2 & 4 clap with light flam on bar 2",
+      "Snare only on 3 for half-time feel",
+      "Clap stack on 2 & 4, ghost rim on 4e",
+      "Alternating rimshot and clap every bar",
+      "Side-stick on 2 & 4 with extra hit before bar change",
+      "Occasional snare drop-out on bar 4 for tension"
+    ];
+
+    var grooveHats = [
+      "1/16 hats with 55% swing and accents on offbeats",
+      "1/8 hats with occasional 1/16 fills at bar ends",
+      "Triplet hats on every 4th bar",
+      "Closed hats on offbeats, open hat on 4 leading to drop",
+      "Alternating two hat samples for call-and-response",
+      "Sparse top loop with shaker instead of hats"
+    ];
+
+    var groovePerc = [
+      "Wooden perc hits on 2e and 4a",
+      "Quiet conga loop tucked under the main groove",
+      "Foley clicks panned randomly every few beats",
+      "Low tom on the '&' of 2 every second bar",
+      "Offbeat tambourine for extra bounce",
+      "One-shot perc only on fills, not in main groove"
+    ];
+
+    var grooveHuman = [
+      "Add small timing nudges: hats late, claps slightly early",
+      "Vary hat velocities between 40–100 for human feel",
+      "Randomly mute 1 kick or clap every 4–8 bars",
+      "Use groove template with light swing on all drums",
+      "Let one perc element be fully unquantised",
+      "Humanise only ghost notes, keep main hits tight"
+    ];
+
+    function generateGroove() {
+      document.getElementById("groove-kick").textContent = pickRandom(grooveKick);
+      document.getElementById("groove-snare").textContent = pickRandom(grooveSnare);
+      document.getElementById("groove-hats").textContent = pickRandom(grooveHats);
+      document.getElementById("groove-perc").textContent = pickRandom(groovePerc);
+      document.getElementById("groove-human").textContent = pickRandom(grooveHuman);
+      document.getElementById("groove-status").textContent = "";
+    }
+
+    function exportGroove() {
+      var lines = [
+        "Drum Groove Recipe:",
+        "- Kick: " + (document.getElementById("groove-kick").textContent || "(none)"),
+        "- Snare / Clap: " + (document.getElementById("groove-snare").textContent || "(none)"),
+        "- Hats / Top: " + (document.getElementById("groove-hats").textContent || "(none)"),
+        "- Percussion: " + (document.getElementById("groove-perc").textContent || "(none)"),
+        "- Human Feel: " + (document.getElementById("groove-human").textContent || "(none)")
+      ];
+      document.getElementById("groove-export").value = lines.join("\n");
+      document.getElementById("groove-status").textContent = "Export updated.";
+    }
+
+    // ----- Sound Palette Generator -----
+    var palLead = [
+      "Soft FM bell lead with slow attack and vibrato",
+      "Warm analog saw lead with slight drift",
+      "Plucked harp-like synth with short decay",
+      "Glass pad doubling a simple motif",
+      "Muted guitar-style pluck through tape delay",
+      "Breathy vocal-like lead with formant movement"
+    ];
+
+    var palBass = [
+      "Subby sine with gentle sidechain",
+      "Plucked mid-bass with slight saturation",
+      "Reese-style bass filtered for warmth",
+      "Acoustic-style upright bass sample, low-passed",
+      "Short 808 notes with minimal glide",
+      "Moog-ish round bass with soft attack"
+    ];
+
+    var palDrums = [
+      "Dry, close-mic’d drums with light room verb",
+      "Crunchy but soft-saturated kit, no harsh highs",
+      "Main kit from analog drum machine, tops from foley",
+      "Brush-style snare with shaker tops",
+      "Tight, short kicks and clicky snares",
+      "Deep kick with fluffy top, hats slightly dark"
+    ];
+
+    var palFx = [
+      "Short room verb on drums, long shimmer only on select hits",
+      "Mono delays inside a wide reverb",
+      "Filtered dub-style delays for sends",
+      "Subtle chorus on pads, no chorus on bass",
+      "Only high elements get long reverb tails",
+      "One main delay type used across all elements"
+    ];
+
+    var palBed = [
+      "Vinyl crackle and low crowd murmur",
+      "Forest ambience with distant birds",
+      "Subtle city hum with distant traffic",
+      "Soft ocean noise low-passed",
+      "Airy noise from synth as constant bed",
+      "Mechanical hum / fan noise filtered and sidechained"
+    ];
+
+    function generatePalette() {
+      document.getElementById("pal-lead").textContent = pickRandom(palLead);
+      document.getElementById("pal-bass").textContent = pickRandom(palBass);
+      document.getElementById("pal-drums").textContent = pickRandom(palDrums);
+      document.getElementById("pal-fx").textContent = pickRandom(palFx);
+      document.getElementById("pal-bed").textContent = pickRandom(palBed);
+      document.getElementById("palette-status").textContent = "";
+    }
+
+    function exportPalette() {
+      var lines = [
+        "Sound Palette:",
+        "- Lead / Main Voice: " + (document.getElementById("pal-lead").textContent || "(none)"),
+        "- Bass Character: " + (document.getElementById("pal-bass").textContent || "(none)"),
+        "- Drum Tone: " + (document.getElementById("pal-drums").textContent || "(none)"),
+        "- FX & Space: " + (document.getElementById("pal-fx").textContent || "(none)"),
+        "- Ambient Bed: " + (document.getElementById("pal-bed").textContent || "(none)")
+      ];
+      document.getElementById("palette-export").value = lines.join("\n");
+      document.getElementById("palette-status").textContent = "Export updated.";
+    }
+
+    // ----- Texture Generator -----
+    var texSource = [
+      "Single piano note or chord",
+      "Metal hit from kitchen object",
+      "Field recording from your phone (street, birds, room tone)",
+      "Old vocal phrase or chant",
+      "Drum loop bounced to audio",
+      "One sustained synth note with filter movement"
+    ];
+
+    var texTime = [
+      "Extreme time-stretch until it becomes a pad",
+      "Reverse then slice into overlapping layers",
+      "Granular stretch with random grain position",
+      "Loop a tiny portion to create a tonal drone",
+      "Use long crossfades between multiple copies",
+      "Create a slow tremolo pattern with volume automation"
+    ];
+
+    var texMove = [
+      "Slow autopan across stereo field",
+      "Random LFO on filter cutoff",
+      "Slow pitch LFO for wobble",
+      "Volume swells tied to sidechain trigger",
+      "Random panning of different texture layers",
+      "Automation curves for rise and fall every 8 bars"
+    ];
+
+    var texChain = [
+      "EQ → saturation → chorus → reverb",
+      "Band-pass filter → delay → reverb",
+      "Granular effect → HP filter → shimmer",
+      "Bitcrush → low-pass → long reverb tail",
+      "Resonator tuned to key → stereo delay",
+      "Compressor sidechained to kick → big hall verb"
+    ];
+
+    var texRole = [
+      "Constant background pad filling midrange",
+      "Riser into each new section",
+      "Occasional swell before fills or drops",
+      "Low, almost subliminal tension layer",
+      "Main texture in breakdown, nearly solo",
+      "Transition glue between contrasting sections"
+    ];
+
+    function generateTexture() {
+      document.getElementById("tex-source").textContent = pickRandom(texSource);
+      document.getElementById("tex-time").textContent = pickRandom(texTime);
+      document.getElementById("tex-move").textContent = pickRandom(texMove);
+      document.getElementById("tex-chain").textContent = pickRandom(texChain);
+      document.getElementById("tex-role").textContent = pickRandom(texRole);
+      document.getElementById("texture-status").textContent = "";
+    }
+
+    function exportTexture() {
+      var lines = [
+        "Texture / Atmos Recipe:",
+        "- Source: " + (document.getElementById("tex-source").textContent || "(none)"),
+        "- Time Manipulation: " + (document.getElementById("tex-time").textContent || "(none)"),
+        "- Movement: " + (document.getElementById("tex-move").textContent || "(none)"),
+        "- Processing Chain: " + (document.getElementById("tex-chain").textContent || "(none)"),
+        "- Role in Track: " + (document.getElementById("tex-role").textContent || "(none)")
+      ];
+      document.getElementById("texture-export").value = lines.join("\n");
+      document.getElementById("texture-status").textContent = "Export updated.";
+    }
+
+    // ----- Arrangement Generator -----
+    var arrSection = [
+      "Introduce a clear B-section with new chord voicing",
+      "Strip back to only drums and bass for 8 bars",
+      "Drop all drums and focus on pads for the breakdown",
+      "Bring in a short bridge with new motif then return",
+      "Double the length of the current loop and vary every 4 bars",
+      "Create an intro that reveals elements one by one"
+    ];
+
+    var arrEnergy = [
+      "Pull energy down by muting the kick for 4 bars",
+      "Gradually add layers every 2 bars for a rising feel",
+      "Switch to half-time for 8 bars then slam back",
+      "Remove bass for one phrase to create tension",
+      "Filter sweep the whole mix down then open on drop",
+      "Add an extra percussion layer only in the high-energy section"
+    ];
+
+    var arrDrumsArr = [
+      "Alternate between two slightly different grooves every 4 bars",
+      "Add hat variations only on the last bar of each phrase",
+      "Use tom fills as transitions into new sections",
+      "Change clap pattern in the B-section for contrast",
+      "Mute all tops and leave only kick + sub for a minimal passage",
+      "Bring in a new percussion motif in the second half of the track"
+    ];
+
+    var arrHarmony = [
+      "Add a simple 2-note counter-melody on top of the chords",
+      "Change one chord in the progression for the B-section",
+      "Move pad voicings up an octave in the more intense section",
+      "Introduce a call-and-response motif between two instruments",
+      "Add a pedal tone in the bass during the breakdown",
+      "Use a modal shift (borrowed chord) for 4 bars as a surprise"
+    ];
+
+    var arrTransition = [
+      "Noise sweep + drum fill into the new section",
+      "Silence on the last half-beat before the drop",
+      "Reverse reverb into the first hit of the next phrase",
+      "Tape stop effect on the master for one beat",
+      "Gradual HP filter on drums then sudden release",
+      "Stutter the last beat of the bar into the next section"
+    ];
+
+    function generateArrangement() {
+      document.getElementById("arr-section").textContent = pickRandom(arrSection);
+      document.getElementById("arr-energy").textContent = pickRandom(arrEnergy);
+      document.getElementById("arr-drums").textContent = pickRandom(arrDrumsArr);
+      document.getElementById("arr-harmony").textContent = pickRandom(arrHarmony);
+      document.getElementById("arr-transition").textContent = pickRandom(arrTransition);
+      document.getElementById("arrange-status").textContent = "";
+    }
+
+    function exportArrangement() {
+      var lines = [
+        "Arrangement Plan:",
+        "- Section Change: " + (document.getElementById("arr-section").textContent || "(none)"),
+        "- Energy Shift: " + (document.getElementById("arr-energy").textContent || "(none)"),
+        "- Drum Variation: " + (document.getElementById("arr-drums").textContent || "(none)"),
+        "- Harmony / Melody: " + (document.getElementById("arr-harmony").textContent || "(none)"),
+        "- Transition Trick: " + (document.getElementById("arr-transition").textContent || "(none)")
+      ];
+      document.getElementById("arrange-export").value = lines.join("\n");
+      document.getElementById("arrange-status").textContent = "Export updated.";
+    }
+
+    // ----- Workflow Generator -----
+    var wfWarmup = [
+      "5–10 minutes of sound design: create one new preset",
+      "Program a simple 4-bar drum loop from scratch",
+      "Jam on your MIDI keyboard to a drone in one key",
+      "Tidy your sample folders for 5 minutes",
+      "Recreate a drum groove from a reference track by ear",
+      "Practice a scale or mode over a metronome"
+    ];
+
+    var wfCore = [
+      "Extend one 8-bar loop into a 32-bar structure",
+      "Write a brand new 8-bar idea with drums, bass, and one lead",
+      "Replace all drums in an old project with a new kit",
+      "Focus on basslines: write 3 different bass ideas for one groove",
+      "Turn one sketch into a rough full arrangement",
+      "Create a full set of fills for one track"
+    ];
+
+    var wfSkill = [
+      "Practice EQ moves on drums using a reference",
+      "Study and recreate the sidechain feel from a favourite track",
+      "Watch one short tutorial and immediately apply the idea",
+      "Practice comping and voice-leading on chords for 10 minutes",
+      "Create 3 different FX chains for one sound",
+      "Do a quick ear-training session (intervals, chords, or rhythms)"
+    ];
+
+    var wfFinish = [
+      "Name and colour all tracks in your current project",
+      "Bounce a rough mix and take quick notes on improvements",
+      "Clean up unused channels and samples in one project",
+      "Organise your “ideas” folder and star your 3 favourites",
+      "Write a short description of the vibe and reference tracks",
+      "Commit to either finishing or archiving one old idea"
+    ];
+
+    var wfReflect = [
+      "Write 2–3 sentences about what worked well today",
+      "Note one thing to try differently next session",
+      "List one technical skill and one musical skill to improve",
+      "Capture one sentence about the emotional feel of your best idea",
+      "Give the session a rating out of 10 and why",
+      "Write down one tiny win you’re proud of"
+    ];
+
+    function generateWorkflow() {
+      document.getElementById("wf-warmup").textContent = pickRandom(wfWarmup);
+      document.getElementById("wf-core").textContent = pickRandom(wfCore);
+      document.getElementById("wf-skill").textContent = pickRandom(wfSkill);
+      document.getElementById("wf-finish").textContent = pickRandom(wfFinish);
+      document.getElementById("wf-reflect").textContent = pickRandom(wfReflect);
+      document.getElementById("workflow-status").textContent = "";
+    }
+
+    function exportWorkflow() {
+      var lines = [
+        "Today’s Session Plan:",
+        "- Warm-Up: " + (document.getElementById("wf-warmup").textContent || "(none)"),
+        "- Core Creation Task: " + (document.getElementById("wf-core").textContent || "(none)"),
+        "- Skill Practice: " + (document.getElementById("wf-skill").textContent || "(none)"),
+        "- Finishing / Admin: " + (document.getElementById("wf-finish").textContent || "(none)"),
+        "- Reflection Prompt: " + (document.getElementById("wf-reflect").textContent || "(none)")
+      ];
+      document.getElementById("workflow-export").value = lines.join("\n");
+      document.getElementById("workflow-status").textContent = "Export updated.";
+    }
+
+    // ----- Initial generation -----
+    generateFill();        // so first tab has content
+    generateGroove();
+    generatePalette();
+    generateTexture();
+    generateArrangement();
+    generateWorkflow();
+  </script>
+</body>
+</html>
