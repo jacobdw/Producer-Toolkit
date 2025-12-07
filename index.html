@@ -11,7 +11,11 @@
   <link rel="apple-touch-icon" href="icon.png">
 
   <style>
-    :root {
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
       --bg: #f5f5f7;
       --card-bg: #ffffff;
       --border: #d3d3dd;
@@ -19,34 +23,63 @@
       --text-muted: #666666;
       --accent: #3b82f6;
       --accent-soft: #e0edff;
-    }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       max-width: 1000px;
       margin: 0 auto;
       padding: 24px 16px 40px;
       background: var(--bg);
       color: var(--text-main);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    body.dark {
+      --bg: #05060a;
+      --card-bg: #10121a;
+      --border: #2a2f3a;
+      --text-main: #f5f5f7;
+      --text-muted: #a0a4b8;
+      --accent: #60a5fa;
+      --accent-soft: #132033;
     }
 
     header {
       margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     h1 {
       font-size: 1.9rem;
-      margin: 0 0 4px;
+      margin: 0 0 2px;
     }
 
     .subtitle {
       font-size: 0.9rem;
       color: var(--text-muted);
-      margin: 0 0 16px;
+      margin: 0;
+    }
+
+    .header-left {
+      min-width: 0;
+    }
+
+    .theme-toggle {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: #ffffff10;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .theme-toggle:hover {
+      background: #ffffff20;
     }
 
     /* Tabs */
@@ -62,7 +95,7 @@
       padding: 6px 12px;
       font-size: 0.85rem;
       border: 1px solid var(--border);
-      background: #ffffff;
+      background: #ffffff10;
       color: var(--text-main);
       cursor: pointer;
       white-space: nowrap;
@@ -71,7 +104,7 @@
     .tab-button.active {
       background: var(--accent-soft);
       border-color: var(--accent);
-      color: #0b3a8c;
+      color: var(--accent);
       font-weight: 600;
     }
 
@@ -82,7 +115,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       padding: 14px 14px 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       margin-bottom: 16px;
     }
 
@@ -107,7 +140,7 @@
       border-radius: 999px;
       border: 1px solid var(--border);
       cursor: pointer;
-      background: #ffffff;
+      background: #ffffff05;
       color: var(--text-main);
     }
 
@@ -118,11 +151,11 @@
     }
 
     button.primary:hover {
-      filter: brightness(0.95);
+      filter: brightness(0.96);
     }
 
     button:not(.primary):hover {
-      background: #f0f0f0;
+      background: #ffffff15;
     }
 
     .cards-grid {
@@ -137,7 +170,15 @@
       border-radius: 12px;
       border: 1px solid var(--border);
       padding: 8px 10px;
-      background: #ffffff;
+      background: var(--card-bg);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 4px;
     }
 
     .card-title {
@@ -145,7 +186,20 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-muted);
-      margin-bottom: 4px;
+    }
+
+    .lock-btn {
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 2px 6px;
+      opacity: 0.4;
+    }
+
+    .lock-btn.locked {
+      opacity: 1;
     }
 
     .card-content {
@@ -165,7 +219,7 @@
       resize: vertical;
       border-radius: 10px;
       border: 1px solid var(--border);
-      background: #ffffff;
+      background: #ffffff05;
       color: var(--text-main);
       padding: 8px 9px;
       font-family: inherit;
@@ -187,9 +241,32 @@
       min-height: 1em;
     }
 
+    .deck-editor-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    select {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff05;
+      color: var(--text-main);
+      font-size: 0.85rem;
+    }
+
     @media (max-width: 600px) {
       body {
-        padding-top: 16px;
+        padding-top: 18px;
       }
       h1 {
         font-size: 1.5rem;
@@ -199,8 +276,11 @@
 </head>
 <body>
   <header>
-    <h1>Producer Toolkit</h1>
-    <p class="subtitle">Tap a tab, hit generate, and let the constraints shape the track.</p>
+    <div class="header-left">
+      <h1>Producer Toolkit</h1>
+      <p class="subtitle">Tap a tab, hit generate, and let the constraints shape the track.</p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button">☀ Light</button>
   </header>
 
   <!-- Tab buttons -->
@@ -211,6 +291,9 @@
     <button class="tab-button" data-tab="texture" onclick="showTab('texture')">Textures / Atmos</button>
     <button class="tab-button" data-tab="arrange" onclick="showTab('arrange')">Arrangement</button>
     <button class="tab-button" data-tab="workflow" onclick="showTab('workflow')">Daily Workflow</button>
+    <button class="tab-button" data-tab="fx" onclick="showTab('fx')">FX Chains</button>
+    <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">Constraints</button>
+    <button class="tab-button" data-tab="decks" onclick="showTab('decks')">Deck Editor</button>
   </nav>
 
   <!-- Drum Fill Generator -->
@@ -221,23 +304,38 @@
 
     <div class="cards-grid">
       <div class="card">
-        <div class="card-title">Structure</div>
+        <div class="card-header">
+          <div class="card-title">Structure</div>
+          <button class="lock-btn" data-target="fill-structure" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="fill-structure"></p>
       </div>
       <div class="card">
-        <div class="card-title">Rate / Rhythm</div>
+        <div class="card-header">
+          <div class="card-title">Rate / Rhythm</div>
+          <button class="lock-btn" data-target="fill-rate" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="fill-rate"></p>
       </div>
       <div class="card">
-        <div class="card-title">Timbre</div>
+        <div class="card-header">
+          <div class="card-title">Timbre</div>
+          <button class="lock-btn" data-target="fill-timbre" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="fill-timbre"></p>
       </div>
       <div class="card">
-        <div class="card-title">Space / Density</div>
+        <div class="card-header">
+          <div class="card-title">Space / Density</div>
+          <button class="lock-btn" data-target="fill-space" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="fill-space"></p>
       </div>
       <div class="card">
-        <div class="card-title">FX</div>
+        <div class="card-header">
+          <div class="card-title">FX</div>
+          <button class="lock-btn" data-target="fill-fx" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="fill-fx"></p>
       </div>
     </div>
@@ -254,28 +352,43 @@
   <!-- Drum Groove Generator -->
   <section class="panel" id="panel-groove">
     <h2>Drum Groove Generator</h2>
-    <p class="panel-description">Use this to design your core drum loop before touching samples. Especially good for organic house / downtempo.</p>
+    <p class="panel-description">Design your core drum loop before touching samples. Especially good for organic house / downtempo.</p>
     <button class="primary" onclick="generateGroove()">Generate Groove</button>
 
     <div class="cards-grid">
       <div class="card">
-        <div class="card-title">Kick Pattern</div>
+        <div class="card-header">
+          <div class="card-title">Kick Pattern</div>
+          <button class="lock-btn" data-target="groove-kick" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="groove-kick"></p>
       </div>
       <div class="card">
-        <div class="card-title">Snare / Clap</div>
+        <div class="card-header">
+          <div class="card-title">Snare / Clap</div>
+          <button class="lock-btn" data-target="groove-snare" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="groove-snare"></p>
       </div>
       <div class="card">
-        <div class="card-title">Hats / Top</div>
+        <div class="card-header">
+          <div class="card-title">Hats / Top</div>
+          <button class="lock-btn" data-target="groove-hats" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="groove-hats"></p>
       </div>
       <div class="card">
-        <div class="card-title">Percussion</div>
+        <div class="card-header">
+          <div class="card-title">Percussion</div>
+          <button class="lock-btn" data-target="groove-perc" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="groove-perc"></p>
       </div>
       <div class="card">
-        <div class="card-title">Human Feel</div>
+        <div class="card-header">
+          <div class="card-title">Human Feel</div>
+          <button class="lock-btn" data-target="groove-human" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="groove-human"></p>
       </div>
     </div>
@@ -296,23 +409,38 @@
 
     <div class="cards-grid">
       <div class="card">
-        <div class="card-title">Lead / Main Voice</div>
+        <div class="card-header">
+          <div class="card-title">Lead / Main Voice</div>
+          <button class="lock-btn" data-target="pal-lead" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="pal-lead"></p>
       </div>
       <div class="card">
-        <div class="card-title">Bass Character</div>
+        <div class="card-header">
+          <div class="card-title">Bass Character</div>
+          <button class="lock-btn" data-target="pal-bass" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="pal-bass"></p>
       </div>
       <div class="card">
-        <div class="card-title">Drum Tone</div>
+        <div class="card-header">
+          <div class="card-title">Drum Tone</div>
+          <button class="lock-btn" data-target="pal-drums" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="pal-drums"></p>
       </div>
       <div class="card">
-        <div class="card-title">FX & Space</div>
+        <div class="card-header">
+          <div class="card-title">FX & Space</div>
+          <button class="lock-btn" data-target="pal-fx" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="pal-fx"></p>
       </div>
       <div class="card">
-        <div class="card-title">Ambient Bed</div>
+        <div class="card-header">
+          <div class="card-title">Ambient Bed</div>
+          <button class="lock-btn" data-target="pal-bed" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="pal-bed"></p>
       </div>
     </div>
@@ -333,23 +461,38 @@
 
     <div class="cards-grid">
       <div class="card">
-        <div class="card-title">Source Material</div>
+        <div class="card-header">
+          <div class="card-title">Source Material</div>
+          <button class="lock-btn" data-target="tex-source" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="tex-source"></p>
       </div>
       <div class="card">
-        <div class="card-title">Time Manipulation</div>
+        <div class="card-header">
+          <div class="card-title">Time Manipulation</div>
+          <button class="lock-btn" data-target="tex-time" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="tex-time"></p>
       </div>
       <div class="card">
-        <div class="card-title">Movement</div>
+        <div class="card-header">
+          <div class="card-title">Movement</div>
+          <button class="lock-btn" data-target="tex-move" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="tex-move"></p>
       </div>
       <div class="card">
-        <div class="card-title">Processing Chain</div>
+        <div class="card-header">
+          <div class="card-title">Processing Chain</div>
+          <button class="lock-btn" data-target="tex-chain" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="tex-chain"></p>
       </div>
       <div class="card">
-        <div class="card-title">Role in Track</div>
+        <div class="card-header">
+          <div class="card-title">Role in Track</div>
+          <button class="lock-btn" data-target="tex-role" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="tex-role"></p>
       </div>
     </div>
@@ -370,23 +513,38 @@
 
     <div class="cards-grid">
       <div class="card">
-        <div class="card-title">Section Change</div>
+        <div class="card-header">
+          <div class="card-title">Section Change</div>
+          <button class="lock-btn" data-target="arr-section" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="arr-section"></p>
       </div>
       <div class="card">
-        <div class="card-title">Energy Shift</div>
+        <div class="card-header">
+          <div class="card-title">Energy Shift</div>
+          <button class="lock-btn" data-target="arr-energy" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="arr-energy"></p>
       </div>
       <div class="card">
-        <div class="card-title">Drum Variation</div>
+        <div class="card-header">
+          <div class="card-title">Drum Variation</div>
+          <button class="lock-btn" data-target="arr-drums" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="arr-drums"></p>
       </div>
       <div class="card">
-        <div class="card-title">Harmony / Melody</div>
+        <div class="card-header">
+          <div class="card-title">Harmony / Melody</div>
+          <button class="lock-btn" data-target="arr-harmony" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="arr-harmony"></p>
       </div>
       <div class="card">
-        <div class="card-title">Transition Trick</div>
+        <div class="card-header">
+          <div class="card-title">Transition Trick</div>
+          <button class="lock-btn" data-target="arr-transition" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="arr-transition"></p>
       </div>
     </div>
@@ -407,23 +565,38 @@
 
     <div class="cards-grid">
       <div class="card">
-        <div class="card-title">Warm-Up</div>
+        <div class="card-header">
+          <div class="card-title">Warm-Up</div>
+          <button class="lock-btn" data-target="wf-warmup" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="wf-warmup"></p>
       </div>
       <div class="card">
-        <div class="card-title">Core Creation Task</div>
+        <div class="card-header">
+          <div class="card-title">Core Creation Task</div>
+          <button class="lock-btn" data-target="wf-core" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="wf-core"></p>
       </div>
       <div class="card">
-        <div class="card-title">Skill Practice</div>
+        <div class="card-header">
+          <div class="card-title">Skill Practice</div>
+          <button class="lock-btn" data-target="wf-skill" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="wf-skill"></p>
       </div>
       <div class="card">
-        <div class="card-title">Finishing / Admin</div>
+        <div class="card-header">
+          <div class="card-title">Finishing / Admin</div>
+          <button class="lock-btn" data-target="wf-finish" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="wf-finish"></p>
       </div>
       <div class="card">
-        <div class="card-title">Reflection</div>
+        <div class="card-header">
+          <div class="card-title">Reflection</div>
+          <button class="lock-btn" data-target="wf-reflect" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
         <p class="card-content" id="wf-reflect"></p>
       </div>
     </div>
@@ -436,8 +609,133 @@
     <div class="status" id="workflow-status"></div>
   </section>
 
+  <!-- FX Chains -->
+  <section class="panel" id="panel-fx">
+    <h2>FX Chain Generator</h2>
+    <p class="panel-description">Generate FX chains for different roles (drums, bass, leads, atmospheres) to explore new tones.</p>
+    <button class="primary" onclick="generateFx()">Generate FX Chain</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Target</div>
+          <button class="lock-btn" data-target="fx-target" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="fx-target"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Core Processors</div>
+          <button class="lock-btn" data-target="fx-core" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="fx-core"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Movement / Mod</div>
+          <button class="lock-btn" data-target="fx-mod" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="fx-mod"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Space (Verb/Delay)</div>
+          <button class="lock-btn" data-target="fx-space" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="fx-space"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Special Sauce</div>
+          <button class="lock-btn" data-target="fx-sauce" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="fx-sauce"></p>
+      </div>
+    </div>
+
+    <textarea id="fx-export" placeholder="Export this chain and rebuild it in your DAW."></textarea>
+    <div class="export-row">
+      <button onclick="exportFx()">Export FX Chain</button>
+      <button onclick="copyText('fx-export','fx-status')">Copy</button>
+    </div>
+    <div class="status" id="fx-status"></div>
+  </section>
+
+  <!-- Creative Constraints -->
+  <section class="panel" id="panel-constraints">
+    <h2>Creative Constraints</h2>
+    <p class="panel-description">Use limitations as prompts: time, palette, arrangement, workflow.</p>
+    <button class="primary" onclick="generateConstraints()">Generate Constraints</button>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Time Box</div>
+          <button class="lock-btn" data-target="cc-time" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="cc-time"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Track Scope</div>
+          <button class="lock-btn" data-target="cc-scope" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="cc-scope"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Palette Restriction</div>
+          <button class="lock-btn" data-target="cc-palette" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="cc-palette"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Arrangement Rule</div>
+          <button class="lock-btn" data-target="cc-arrange" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="cc-arrange"></p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Workflow Constraint</div>
+          <button class="lock-btn" data-target="cc-workflow" type="button" onclick="toggleLock(this)">🔓</button>
+        </div>
+        <p class="card-content" id="cc-workflow"></p>
+      </div>
+    </div>
+
+    <textarea id="constraints-export" placeholder="Export these and stick them in your session notes."></textarea>
+    <div class="export-row">
+      <button onclick="exportConstraints()">Export Constraints</button>
+      <button onclick="copyText('constraints-export','constraints-status')">Copy</button>
+    </div>
+    <div class="status" id="constraints-status"></div>
+  </section>
+
+  <!-- Deck Editor -->
+  <section class="panel" id="panel-decks">
+    <h2>Deck Editor</h2>
+    <p class="panel-description">
+      Edit the idea lists used by all generators. Changes are saved locally on this device and won’t affect other machines.
+    </p>
+
+    <div class="deck-editor-row">
+      <label for="deck-select">Choose deck:</label>
+      <select id="deck-select" onchange="loadDeckIntoEditor()"></select>
+    </div>
+
+    <textarea id="deck-editor-text" placeholder="One item per line. Empty lines are ignored."></textarea>
+    <div class="export-row">
+      <button onclick="saveDeckFromEditor()">Save Changes</button>
+      <button onclick="resetDeckFromEditor()">Reset to Default</button>
+    </div>
+    <div class="status" id="deck-editor-status"></div>
+    <p class="note">Tip: write entries as short instructions, like advice to future-you.</p>
+  </section>
+
   <script>
-    // ----- Utility -----
+    // ---------- Utility ----------
     function pickRandom(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
@@ -445,88 +743,527 @@
     function copyText(textareaId, statusId) {
       var area = document.getElementById(textareaId);
       if (!area.value.trim()) {
-        // nothing to copy
         document.getElementById(statusId).textContent = "Nothing to copy yet.";
         return;
       }
       area.select();
       try {
         var ok = document.execCommand("copy");
-        document.getElementById(statusId).textContent = ok ? "Copied to clipboard ✔" : "Could not copy automatically, but text is selected.";
+        document.getElementById(statusId).textContent = ok
+          ? "Copied to clipboard ✔"
+          : "Could not copy automatically, but text is selected.";
       } catch (e) {
-        document.getElementById(statusId).textContent = "Copy failed in this browser, but text is selected.";
+        document.getElementById(statusId).textContent = "Copy failed, but text is selected.";
       }
     }
 
-    function showTab(name) {
-      // buttons
-      var buttons = document.querySelectorAll(".tab-button");
-      buttons.forEach(function(btn) {
-        btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
-      });
+    // Lock helpers
+    function toggleLock(btn) {
+      btn.classList.toggle("locked");
+      btn.textContent = btn.classList.contains("locked") ? "🔒" : "🔓";
+    }
 
-      // panels
-      var panels = document.querySelectorAll(".panel");
-      panels.forEach(function(panel) {
-        panel.classList.toggle("active", panel.id === "panel-" + name);
+    function isLocked(targetId) {
+      var btn = document.querySelector('.lock-btn[data-target="' + targetId + '"]');
+      return btn && btn.classList.contains("locked");
+    }
+
+    // Theme toggle with persistence
+    function applyTheme(theme) {
+      var body = document.body;
+      var toggle = document.getElementById("theme-toggle");
+      if (theme === "dark") {
+        body.classList.add("dark");
+        toggle.textContent = "🌙 Dark";
+      } else {
+        body.classList.remove("dark");
+        toggle.textContent = "☀ Light";
+      }
+    }
+
+    function initTheme() {
+      var saved = null;
+      try {
+        saved = localStorage.getItem("pt_theme");
+      } catch (e) {}
+      var theme = saved || "light";
+      applyTheme(theme);
+
+      var toggle = document.getElementById("theme-toggle");
+      toggle.addEventListener("click", function () {
+        var newTheme = document.body.classList.contains("dark") ? "light" : "dark";
+        applyTheme(newTheme);
+        try {
+          localStorage.setItem("pt_theme", newTheme);
+        } catch (e) {}
       });
     }
 
-    // ----- Drum Fill Generator -----
-    var fillStructure = [
-      "1/4-bar microfill right before the drop",
-      "1/2-bar fill at the end of the phrase",
-      "1-bar fill leading into a new section",
-      "Microfill just before the snare on beat 4",
-      "Stop-everything fill: full bar of tension then slam on 1",
-      "Tiny pick-up fill using the last 2 beats only"
-    ];
+    // Tabs with persistence
+    function showTab(name) {
+      var buttons = document.querySelectorAll(".tab-button");
+      buttons.forEach(function (btn) {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
+      });
 
-    var fillRate = [
-      "1/8 → 1/16 acceleration across the fill",
-      "Triplet burst then resolve back to straight 1/8",
-      "3-note groupings over 4/4 (3-3-3-3 feel)",
-      "Ratchet one element (e.g. hat) into 1/32 on the last beat",
-      "Busy → minimal, thinning hits towards beat 1",
-      "Shift the last snare/clap early by a few ms for a pulled feel"
-    ];
+      var panels = document.querySelectorAll(".panel");
+      panels.forEach(function (panel) {
+        panel.classList.toggle("active", panel.id === "panel-" + name);
+      });
 
-    var fillTimbre = [
-      "Tuned tom run with melodic movement",
-      "Foley clicks / paper crinkle as high percussion",
-      "Noise burst shaped with a filter envelope",
-      "Dry rimshot + clap stack as the main voice",
-      "Mallet / marimba-style hits as a percussive melody",
-      "Seed shaker or small hand percussion chopped into hits",
-      "Reverse cymbal or whoosh layered behind each hit"
-    ];
+      try {
+        localStorage.setItem("pt_tab", name);
+      } catch (e) {}
+    }
 
-    var fillSpace = [
-      "Remove the kick entirely in the fill bar",
-      "Mute hats: only toms / perc and silence",
-      "Leave the last half-beat completely empty before the drop",
-      "Mono, dry fill after a wide, wet groove",
-      "Ghost notes swelling in density towards beat 1",
-      "Low-only fill (sub + toms) with no highs",
-      "High-only fill (hats / clicks) with no lows"
-    ];
+    function initTabs() {
+      var saved = null;
+      try {
+        saved = localStorage.getItem("pt_tab");
+      } catch (e) {}
+      var initial = saved || "fill";
+      showTab(initial);
+    }
 
-    var fillFx = [
-      "Single delay throw on one key hit (1/8 or 1/4 note)",
-      "Reverse reverb swell into the downbeat",
-      "Low-pass filter sweep down, then hard open on 1",
-      "Short grain delay stutter on a clap or tom",
-      "Resonator tuned to 5ths on a noise burst",
-      "Freeze a reverb tail, resample, then chop it as fill material",
-      "Subtle phaser or flanger moving across the fill only"
-    ];
+    // ---------- Decks (single source of truth) ----------
+    const DEFAULT_DECKS = {
+      // Drum fills
+      "fill-structure": [
+        "1/4-bar microfill right before the drop",
+        "1/2-bar fill at the end of the phrase",
+        "1-bar fill leading into a new section",
+        "Microfill just before the snare on beat 4",
+        "Stop-everything fill: full bar of tension then slam on 1",
+        "Tiny pick-up fill using the last 2 beats only"
+      ],
+      "fill-rate": [
+        "1/8 → 1/16 acceleration across the fill",
+        "Triplet burst then resolve back to straight 1/8",
+        "3-note groupings over 4/4 (3-3-3-3 feel)",
+        "Ratchet one element (e.g. hat) into 1/32 on the last beat",
+        "Busy → minimal, thinning hits towards beat 1",
+        "Shift the last snare/clap early by a few ms for a pulled feel"
+      ],
+      "fill-timbre": [
+        "Tuned tom run with melodic movement",
+        "Foley clicks / paper crinkle as high percussion",
+        "Noise burst shaped with a filter envelope",
+        "Dry rimshot + clap stack as the main voice",
+        "Mallet / marimba-style hits as a percussive melody",
+        "Seed shaker or small hand percussion chopped into hits",
+        "Reverse cymbal or whoosh layered behind each hit"
+      ],
+      "fill-space": [
+        "Remove the kick entirely in the fill bar",
+        "Mute hats: only toms / perc and silence",
+        "Leave the last half-beat completely empty before the drop",
+        "Mono, dry fill after a wide, wet groove",
+        "Ghost notes swelling in density towards beat 1",
+        "Low-only fill (sub + toms) with no highs",
+        "High-only fill (hats / clicks) with no lows"
+      ],
+      "fill-fx": [
+        "Single delay throw on one key hit (1/8 or 1/4 note)",
+        "Reverse reverb swell into the downbeat",
+        "Low-pass filter sweep down, then hard open on 1",
+        "Short grain delay stutter on a clap or tom",
+        "Resonator tuned to 5ths on a noise burst",
+        "Freeze a reverb tail, resample, then chop it as fill material",
+        "Subtle phaser or flanger moving across the fill only"
+      ],
 
+      // Grooves
+      "groove-kick": [
+        "Four-on-the-floor with occasional skip on bar 4",
+        "Broken kick pattern with gaps on beat 3",
+        "Sparse kicks only on 1 and the '&' of 3",
+        "Syncopated pattern: 1, 2&, 3&, 4",
+        "Half-time kick pattern for laid-back groove",
+        "Steady 4/4 in verse, add ghost kicks in pre-drop"
+      ],
+      "groove-snare": [
+        "Standard 2 & 4 clap with light flam on bar 2",
+        "Snare only on 3 for half-time feel",
+        "Clap stack on 2 & 4, ghost rim on 4e",
+        "Alternating rimshot and clap every bar",
+        "Side-stick on 2 & 4 with extra hit before bar change",
+        "Occasional snare drop-out on bar 4 for tension"
+      ],
+      "groove-hats": [
+        "1/16 hats with 55% swing and accents on offbeats",
+        "1/8 hats with occasional 1/16 fills at bar ends",
+        "Triplet hats on every 4th bar",
+        "Closed hats on offbeats, open hat on 4 leading to drop",
+        "Alternating two hat samples for call-and-response",
+        "Sparse top loop with shaker instead of hats"
+      ],
+      "groove-perc": [
+        "Wooden perc hits on 2e and 4a",
+        "Quiet conga loop tucked under the main groove",
+        "Foley clicks panned randomly every few beats",
+        "Low tom on the '&' of 2 every second bar",
+        "Offbeat tambourine for extra bounce",
+        "One-shot perc only on fills, not in main groove"
+      ],
+      "groove-human": [
+        "Add small timing nudges: hats late, claps slightly early",
+        "Vary hat velocities between 40–100 for human feel",
+        "Randomly mute 1 kick or clap every 4–8 bars",
+        "Use groove template with light swing on all drums",
+        "Let one perc element be fully unquantised",
+        "Humanise only ghost notes, keep main hits tight"
+      ],
+
+      // Palette
+      "pal-lead": [
+        "Soft FM bell lead with slow attack and vibrato",
+        "Warm analog saw lead with slight drift",
+        "Plucked harp-like synth with short decay",
+        "Glass pad doubling a simple motif",
+        "Muted guitar-style pluck through tape delay",
+        "Breathy vocal-like lead with formant movement"
+      ],
+      "pal-bass": [
+        "Subby sine with gentle sidechain",
+        "Plucked mid-bass with slight saturation",
+        "Reese-style bass filtered for warmth",
+        "Acoustic-style upright bass sample, low-passed",
+        "Short 808 notes with minimal glide",
+        "Moog-ish round bass with soft attack"
+      ],
+      "pal-drums": [
+        "Dry, close-mic’d drums with light room verb",
+        "Crunchy but soft-saturated kit, no harsh highs",
+        "Main kit from analog drum machine, tops from foley",
+        "Brush-style snare with shaker tops",
+        "Tight, short kicks and clicky snares",
+        "Deep kick with fluffy top, hats slightly dark"
+      ],
+      "pal-fx": [
+        "Short room verb on drums, long shimmer only on select hits",
+        "Mono delays inside a wide reverb",
+        "Filtered dub-style delays for sends",
+        "Subtle chorus on pads, no chorus on bass",
+        "Only high elements get long reverb tails",
+        "One main delay type used across all elements"
+      ],
+      "pal-bed": [
+        "Vinyl crackle and low crowd murmur",
+        "Forest ambience with distant birds",
+        "Subtle city hum with distant traffic",
+        "Soft ocean noise low-passed",
+        "Airy noise from synth as constant bed",
+        "Mechanical hum / fan noise filtered and sidechained"
+      ],
+
+      // Texture
+      "tex-source": [
+        "Single piano note or chord",
+        "Metal hit from kitchen object",
+        "Field recording from your phone (street, birds, room tone)",
+        "Old vocal phrase or chant",
+        "Drum loop bounced to audio",
+        "One sustained synth note with filter movement"
+      ],
+      "tex-time": [
+        "Extreme time-stretch until it becomes a pad",
+        "Reverse then slice into overlapping layers",
+        "Granular stretch with random grain position",
+        "Loop a tiny portion to create a tonal drone",
+        "Use long crossfades between multiple copies",
+        "Create a slow tremolo pattern with volume automation"
+      ],
+      "tex-move": [
+        "Slow autopan across stereo field",
+        "Random LFO on filter cutoff",
+        "Slow pitch LFO for wobble",
+        "Volume swells tied to sidechain trigger",
+        "Random panning of different texture layers",
+        "Automation curves for rise and fall every 8 bars"
+      ],
+      "tex-chain": [
+        "EQ → saturation → chorus → reverb",
+        "Band-pass filter → delay → reverb",
+        "Granular effect → HP filter → shimmer",
+        "Bitcrush → low-pass → long reverb tail",
+        "Resonator tuned to key → stereo delay",
+        "Compressor sidechained to kick → big hall verb"
+      ],
+      "tex-role": [
+        "Constant background pad filling midrange",
+        "Riser into each new section",
+        "Occasional swell before fills or drops",
+        "Low, almost subliminal tension layer",
+        "Main texture in breakdown, nearly solo",
+        "Transition glue between contrasting sections"
+      ],
+
+      // Arrangement
+      "arr-section": [
+        "Introduce a clear B-section with new chord voicing",
+        "Strip back to only drums and bass for 8 bars",
+        "Drop all drums and focus on pads for the breakdown",
+        "Bring in a short bridge with new motif then return",
+        "Double the length of the current loop and vary every 4 bars",
+        "Create an intro that reveals elements one by one"
+      ],
+      "arr-energy": [
+        "Pull energy down by muting the kick for 4 bars",
+        "Gradually add layers every 2 bars for a rising feel",
+        "Switch to half-time for 8 bars then slam back",
+        "Remove bass for one phrase to create tension",
+        "Filter sweep the whole mix down then open on drop",
+        "Add an extra percussion layer only in the high-energy section"
+      ],
+      "arr-drums": [
+        "Alternate between two slightly different grooves every 4 bars",
+        "Add hat variations only on the last bar of each phrase",
+        "Use tom fills as transitions into new sections",
+        "Change clap pattern in the B-section for contrast",
+        "Mute all tops and leave only kick + sub for a minimal passage",
+        "Bring in a new percussion motif in the second half of the track"
+      ],
+      "arr-harmony": [
+        "Add a simple 2-note counter-melody on top of the chords",
+        "Change one chord in the progression for the B-section",
+        "Move pad voicings up an octave in the more intense section",
+        "Introduce a call-and-response motif between two instruments",
+        "Add a pedal tone in the bass during the breakdown",
+        "Use a modal shift (borrowed chord) for 4 bars as a surprise"
+      ],
+      "arr-transition": [
+        "Noise sweep + drum fill into the new section",
+        "Silence on the last half-beat before the drop",
+        "Reverse reverb into the first hit of the next phrase",
+        "Tape stop effect on the master for one beat",
+        "Gradual HP filter on drums then sudden release",
+        "Stutter the last beat of the bar into the next section"
+      ],
+
+      // Workflow
+      "wf-warmup": [
+        "5–10 minutes of sound design: create one new preset",
+        "Program a simple 4-bar drum loop from scratch",
+        "Jam on your MIDI keyboard to a drone in one key",
+        "Tidy your sample folders for 5 minutes",
+        "Recreate a drum groove from a reference track by ear",
+        "Practice a scale or mode over a metronome"
+      ],
+      "wf-core": [
+        "Extend one 8-bar loop into a 32-bar structure",
+        "Write a brand new 8-bar idea with drums, bass, and one lead",
+        "Replace all drums in an old project with a new kit",
+        "Focus on basslines: write 3 different bass ideas for one groove",
+        "Turn one sketch into a rough full arrangement",
+        "Create a full set of fills for one track"
+      ],
+      "wf-skill": [
+        "Practice EQ moves on drums using a reference",
+        "Study and recreate the sidechain feel from a favourite track",
+        "Watch one short tutorial and immediately apply the idea",
+        "Practice comping and voice-leading on chords for 10 minutes",
+        "Create 3 different FX chains for one sound",
+        "Do a quick ear-training session (intervals, chords, or rhythms)"
+      ],
+      "wf-finish": [
+        "Name and colour all tracks in your current project",
+        "Bounce a rough mix and take quick notes on improvements",
+        "Clean up unused channels and samples in one project",
+        "Organise your “ideas” folder and star your 3 favourites",
+        "Write a short description of the vibe and reference tracks",
+        "Commit to either finishing or archiving one old idea"
+      ],
+      "wf-reflect": [
+        "Write 2–3 sentences about what worked well today",
+        "Note one thing to try differently next session",
+        "List one technical skill and one musical skill to improve",
+        "Capture one sentence about the emotional feel of your best idea",
+        "Give the session a rating out of 10 and why",
+        "Write down one tiny win you’re proud of"
+      ],
+
+      // FX Chains
+      "fx-target": [
+        "Drum bus (all drums)",
+        "Kick + bass group",
+        "Main lead synth",
+        "Pad / atmosphere bus",
+        "FX / riser channel",
+        "Vocal or vocal chop bus"
+      ],
+      "fx-core": [
+        "EQ → gentle saturation → compressor (glue)",
+        "HP filter → transient shaper → bus compressor",
+        "Tilt EQ → tape saturation → clipper",
+        "Multiband saturation → precise EQ cleanup",
+        "Soft clipper → limiter (for controlled aggression)",
+        "Dynamic EQ → compressor sidechained from kick"
+      ],
+      "fx-mod": [
+        "Slow LFO on filter cutoff synced to 2–4 bars",
+        "Envelope follower on filter from drum level",
+        "Subtle chorus or doubler with mix under 20%",
+        "Auto-pan synced to tempo on high frequencies only",
+        "Random LFO on a band-pass filter",
+        "Sidechained volume shaper from the kick pattern"
+      ],
+      "fx-space": [
+        "Short room reverb (10–20% wet) for glue",
+        "Send to a long hall reverb with sidechain ducking",
+        "Mono delay into stereo reverb for width",
+        "1/8 dotted delay feeding a plate reverb",
+        "Spring-style reverb on mids only (HP/LP filtered)",
+        "No verb, only tempo-synced delay for clarity"
+      ],
+      "fx-sauce": [
+        "Bitcrush only the highs with a band-split",
+        "Granular / spectral effect at very low mix",
+        "Resonator bank tuned to the track’s key",
+        "Pitch shifter up a 5th mixed very low",
+        "Frequency shifter moving slowly over time",
+        "Parallel ‘destroyed’ channel blended at 5–10% wet"
+      ],
+
+      // Creative Constraints
+      "cc-time": [
+        "Write for 25 minutes, then stop and bounce whatever you have.",
+        "1-hour session maximum: arrangement over perfection.",
+        "10-minute idea sprint: only drums and bass.",
+        "30 minutes to turn one old loop into a new section.",
+        "15-minute sound design sprint, then commit: no tweaking after.",
+        "Work in 3x 15-minute blocks with 5-minute breaks."
+      ],
+      "cc-scope": [
+        "Track must be under 3 minutes.",
+        "Only make a loop and a B-section, nothing more.",
+        "Focus only on intro + first drop.",
+        "Make a 60–90 second vignette, not a full song.",
+        "Only structure: intro → main → breakdown → outro.",
+        "One idea per track: no key changes, no extra sections."
+      ],
+      "cc-palette": [
+        "Use only one synth for all melodic parts.",
+        "Drums must come only from foley / recorded sounds.",
+        "Max 8 audio/MIDI tracks total.",
+        "No more than 3 drum elements at once (kick, snare, one top).",
+        "Only one reverb and one delay plugin allowed.",
+        "Work in mono until the final 10 minutes."
+      ],
+      "cc-arrange": [
+        "Something must change every 8 bars (mute, add, filter, etc.).",
+        "No copy-paste: every repeated section has at least one variation.",
+        "At least one full bar of silence somewhere in the track.",
+        "Each main section must introduce or remove one element.",
+        "Use a drum fill into every new major section.",
+        "End the track by stripping back to the original idea."
+      ],
+      "cc-workflow": [
+        "No preset browsing: use the first usable sound you land on.",
+        "No looking at the screen while jamming ideas (turn monitor away or dim).",
+        "Freeze and flatten tracks as soon as you’re happy with the sound.",
+        "No solo button use: mix in context only.",
+        "Pick one reference track and compare every 15 minutes.",
+        "No more than 2 plugins per channel, except utility/sidechain."
+      ]
+    };
+
+    const DECK_META = {
+      "fill-structure": "Fill – Structure",
+      "fill-rate": "Fill – Rate / Rhythm",
+      "fill-timbre": "Fill – Timbre",
+      "fill-space": "Fill – Space / Density",
+      "fill-fx": "Fill – FX",
+
+      "groove-kick": "Groove – Kick Pattern",
+      "groove-snare": "Groove – Snare / Clap",
+      "groove-hats": "Groove – Hats / Tops",
+      "groove-perc": "Groove – Percussion",
+      "groove-human": "Groove – Human Feel",
+
+      "pal-lead": "Palette – Lead / Main Voice",
+      "pal-bass": "Palette – Bass",
+      "pal-drums": "Palette – Drum Tone",
+      "pal-fx": "Palette – FX / Space",
+      "pal-bed": "Palette – Ambient Bed",
+
+      "tex-source": "Texture – Source",
+      "tex-time": "Texture – Time Manipulation",
+      "tex-move": "Texture – Movement",
+      "tex-chain": "Texture – Processing Chain",
+      "tex-role": "Texture – Role in Track",
+
+      "arr-section": "Arrangement – Section Change",
+      "arr-energy": "Arrangement – Energy Shift",
+      "arr-drums": "Arrangement – Drum Variation",
+      "arr-harmony": "Arrangement – Harmony / Melody",
+      "arr-transition": "Arrangement – Transition Trick",
+
+      "wf-warmup": "Workflow – Warm-Up",
+      "wf-core": "Workflow – Core Creation",
+      "wf-skill": "Workflow – Skill Practice",
+      "wf-finish": "Workflow – Finishing / Admin",
+      "wf-reflect": "Workflow – Reflection",
+
+      "fx-target": "FX – Target",
+      "fx-core": "FX – Core Processors",
+      "fx-mod": "FX – Movement / Modulation",
+      "fx-space": "FX – Space (Verb/Delay)",
+      "fx-sauce": "FX – Special Sauce",
+
+      "cc-time": "Constraints – Time Box",
+      "cc-scope": "Constraints – Scope",
+      "cc-palette": "Constraints – Palette",
+      "cc-arrange": "Constraints – Arrangement Rule",
+      "cc-workflow": "Constraints – Workflow"
+    };
+
+    let decks = {};
+
+    function loadDecks() {
+      let loaded = null;
+      try {
+        const raw = localStorage.getItem("pt_decks");
+        if (raw) loaded = JSON.parse(raw);
+      } catch (e) {
+        loaded = null;
+      }
+
+      decks = {};
+      for (const key in DEFAULT_DECKS) {
+        if (loaded && Array.isArray(loaded[key])) {
+          decks[key] = loaded[key];
+        } else {
+          decks[key] = DEFAULT_DECKS[key].slice();
+        }
+      }
+    }
+
+    function saveDecks() {
+      try {
+        localStorage.setItem("pt_decks", JSON.stringify(decks));
+      } catch (e) {}
+    }
+
+    function pickFromDeck(deckId) {
+      const list = decks[deckId] || [];
+      if (!list.length) return "(no options defined)";
+      return pickRandom(list);
+    }
+
+    // ---------- Generators & Exports ----------
+
+    // Drum Fill
     function generateFill() {
-      document.getElementById("fill-structure").textContent = pickRandom(fillStructure);
-      document.getElementById("fill-rate").textContent = pickRandom(fillRate);
-      document.getElementById("fill-timbre").textContent = pickRandom(fillTimbre);
-      document.getElementById("fill-space").textContent = pickRandom(fillSpace);
-      document.getElementById("fill-fx").textContent = pickRandom(fillFx);
+      if (!isLocked("fill-structure"))
+        document.getElementById("fill-structure").textContent = pickFromDeck("fill-structure");
+      if (!isLocked("fill-rate"))
+        document.getElementById("fill-rate").textContent = pickFromDeck("fill-rate");
+      if (!isLocked("fill-timbre"))
+        document.getElementById("fill-timbre").textContent = pickFromDeck("fill-timbre");
+      if (!isLocked("fill-space"))
+        document.getElementById("fill-space").textContent = pickFromDeck("fill-space");
+      if (!isLocked("fill-fx"))
+        document.getElementById("fill-fx").textContent = pickFromDeck("fill-fx");
       document.getElementById("fill-status").textContent = "";
     }
 
@@ -543,58 +1280,18 @@
       document.getElementById("fill-status").textContent = "Export updated.";
     }
 
-    // ----- Groove Generator -----
-    var grooveKick = [
-      "Four-on-the-floor with occasional skip on bar 4",
-      "Broken kick pattern with gaps on beat 3",
-      "Sparse kicks only on 1 and the '&' of 3",
-      "Syncopated pattern: 1, 2&, 3&, 4",
-      "Half-time kick pattern for laid-back groove",
-      "Steady 4/4 in verse, add ghost kicks in pre-drop"
-    ];
-
-    var grooveSnare = [
-      "Standard 2 & 4 clap with light flam on bar 2",
-      "Snare only on 3 for half-time feel",
-      "Clap stack on 2 & 4, ghost rim on 4e",
-      "Alternating rimshot and clap every bar",
-      "Side-stick on 2 & 4 with extra hit before bar change",
-      "Occasional snare drop-out on bar 4 for tension"
-    ];
-
-    var grooveHats = [
-      "1/16 hats with 55% swing and accents on offbeats",
-      "1/8 hats with occasional 1/16 fills at bar ends",
-      "Triplet hats on every 4th bar",
-      "Closed hats on offbeats, open hat on 4 leading to drop",
-      "Alternating two hat samples for call-and-response",
-      "Sparse top loop with shaker instead of hats"
-    ];
-
-    var groovePerc = [
-      "Wooden perc hits on 2e and 4a",
-      "Quiet conga loop tucked under the main groove",
-      "Foley clicks panned randomly every few beats",
-      "Low tom on the '&' of 2 every second bar",
-      "Offbeat tambourine for extra bounce",
-      "One-shot perc only on fills, not in main groove"
-    ];
-
-    var grooveHuman = [
-      "Add small timing nudges: hats late, claps slightly early",
-      "Vary hat velocities between 40–100 for human feel",
-      "Randomly mute 1 kick or clap every 4–8 bars",
-      "Use groove template with light swing on all drums",
-      "Let one perc element be fully unquantised",
-      "Humanise only ghost notes, keep main hits tight"
-    ];
-
+    // Groove
     function generateGroove() {
-      document.getElementById("groove-kick").textContent = pickRandom(grooveKick);
-      document.getElementById("groove-snare").textContent = pickRandom(grooveSnare);
-      document.getElementById("groove-hats").textContent = pickRandom(grooveHats);
-      document.getElementById("groove-perc").textContent = pickRandom(groovePerc);
-      document.getElementById("groove-human").textContent = pickRandom(grooveHuman);
+      if (!isLocked("groove-kick"))
+        document.getElementById("groove-kick").textContent = pickFromDeck("groove-kick");
+      if (!isLocked("groove-snare"))
+        document.getElementById("groove-snare").textContent = pickFromDeck("groove-snare");
+      if (!isLocked("groove-hats"))
+        document.getElementById("groove-hats").textContent = pickFromDeck("groove-hats");
+      if (!isLocked("groove-perc"))
+        document.getElementById("groove-perc").textContent = pickFromDeck("groove-perc");
+      if (!isLocked("groove-human"))
+        document.getElementById("groove-human").textContent = pickFromDeck("groove-human");
       document.getElementById("groove-status").textContent = "";
     }
 
@@ -611,58 +1308,18 @@
       document.getElementById("groove-status").textContent = "Export updated.";
     }
 
-    // ----- Sound Palette Generator -----
-    var palLead = [
-      "Soft FM bell lead with slow attack and vibrato",
-      "Warm analog saw lead with slight drift",
-      "Plucked harp-like synth with short decay",
-      "Glass pad doubling a simple motif",
-      "Muted guitar-style pluck through tape delay",
-      "Breathy vocal-like lead with formant movement"
-    ];
-
-    var palBass = [
-      "Subby sine with gentle sidechain",
-      "Plucked mid-bass with slight saturation",
-      "Reese-style bass filtered for warmth",
-      "Acoustic-style upright bass sample, low-passed",
-      "Short 808 notes with minimal glide",
-      "Moog-ish round bass with soft attack"
-    ];
-
-    var palDrums = [
-      "Dry, close-mic’d drums with light room verb",
-      "Crunchy but soft-saturated kit, no harsh highs",
-      "Main kit from analog drum machine, tops from foley",
-      "Brush-style snare with shaker tops",
-      "Tight, short kicks and clicky snares",
-      "Deep kick with fluffy top, hats slightly dark"
-    ];
-
-    var palFx = [
-      "Short room verb on drums, long shimmer only on select hits",
-      "Mono delays inside a wide reverb",
-      "Filtered dub-style delays for sends",
-      "Subtle chorus on pads, no chorus on bass",
-      "Only high elements get long reverb tails",
-      "One main delay type used across all elements"
-    ];
-
-    var palBed = [
-      "Vinyl crackle and low crowd murmur",
-      "Forest ambience with distant birds",
-      "Subtle city hum with distant traffic",
-      "Soft ocean noise low-passed",
-      "Airy noise from synth as constant bed",
-      "Mechanical hum / fan noise filtered and sidechained"
-    ];
-
+    // Palette
     function generatePalette() {
-      document.getElementById("pal-lead").textContent = pickRandom(palLead);
-      document.getElementById("pal-bass").textContent = pickRandom(palBass);
-      document.getElementById("pal-drums").textContent = pickRandom(palDrums);
-      document.getElementById("pal-fx").textContent = pickRandom(palFx);
-      document.getElementById("pal-bed").textContent = pickRandom(palBed);
+      if (!isLocked("pal-lead"))
+        document.getElementById("pal-lead").textContent = pickFromDeck("pal-lead");
+      if (!isLocked("pal-bass"))
+        document.getElementById("pal-bass").textContent = pickFromDeck("pal-bass");
+      if (!isLocked("pal-drums"))
+        document.getElementById("pal-drums").textContent = pickFromDeck("pal-drums");
+      if (!isLocked("pal-fx"))
+        document.getElementById("pal-fx").textContent = pickFromDeck("pal-fx");
+      if (!isLocked("pal-bed"))
+        document.getElementById("pal-bed").textContent = pickFromDeck("pal-bed");
       document.getElementById("palette-status").textContent = "";
     }
 
@@ -679,58 +1336,18 @@
       document.getElementById("palette-status").textContent = "Export updated.";
     }
 
-    // ----- Texture Generator -----
-    var texSource = [
-      "Single piano note or chord",
-      "Metal hit from kitchen object",
-      "Field recording from your phone (street, birds, room tone)",
-      "Old vocal phrase or chant",
-      "Drum loop bounced to audio",
-      "One sustained synth note with filter movement"
-    ];
-
-    var texTime = [
-      "Extreme time-stretch until it becomes a pad",
-      "Reverse then slice into overlapping layers",
-      "Granular stretch with random grain position",
-      "Loop a tiny portion to create a tonal drone",
-      "Use long crossfades between multiple copies",
-      "Create a slow tremolo pattern with volume automation"
-    ];
-
-    var texMove = [
-      "Slow autopan across stereo field",
-      "Random LFO on filter cutoff",
-      "Slow pitch LFO for wobble",
-      "Volume swells tied to sidechain trigger",
-      "Random panning of different texture layers",
-      "Automation curves for rise and fall every 8 bars"
-    ];
-
-    var texChain = [
-      "EQ → saturation → chorus → reverb",
-      "Band-pass filter → delay → reverb",
-      "Granular effect → HP filter → shimmer",
-      "Bitcrush → low-pass → long reverb tail",
-      "Resonator tuned to key → stereo delay",
-      "Compressor sidechained to kick → big hall verb"
-    ];
-
-    var texRole = [
-      "Constant background pad filling midrange",
-      "Riser into each new section",
-      "Occasional swell before fills or drops",
-      "Low, almost subliminal tension layer",
-      "Main texture in breakdown, nearly solo",
-      "Transition glue between contrasting sections"
-    ];
-
+    // Texture
     function generateTexture() {
-      document.getElementById("tex-source").textContent = pickRandom(texSource);
-      document.getElementById("tex-time").textContent = pickRandom(texTime);
-      document.getElementById("tex-move").textContent = pickRandom(texMove);
-      document.getElementById("tex-chain").textContent = pickRandom(texChain);
-      document.getElementById("tex-role").textContent = pickRandom(texRole);
+      if (!isLocked("tex-source"))
+        document.getElementById("tex-source").textContent = pickFromDeck("tex-source");
+      if (!isLocked("tex-time"))
+        document.getElementById("tex-time").textContent = pickFromDeck("tex-time");
+      if (!isLocked("tex-move"))
+        document.getElementById("tex-move").textContent = pickFromDeck("tex-move");
+      if (!isLocked("tex-chain"))
+        document.getElementById("tex-chain").textContent = pickFromDeck("tex-chain");
+      if (!isLocked("tex-role"))
+        document.getElementById("tex-role").textContent = pickFromDeck("tex-role");
       document.getElementById("texture-status").textContent = "";
     }
 
@@ -747,58 +1364,18 @@
       document.getElementById("texture-status").textContent = "Export updated.";
     }
 
-    // ----- Arrangement Generator -----
-    var arrSection = [
-      "Introduce a clear B-section with new chord voicing",
-      "Strip back to only drums and bass for 8 bars",
-      "Drop all drums and focus on pads for the breakdown",
-      "Bring in a short bridge with new motif then return",
-      "Double the length of the current loop and vary every 4 bars",
-      "Create an intro that reveals elements one by one"
-    ];
-
-    var arrEnergy = [
-      "Pull energy down by muting the kick for 4 bars",
-      "Gradually add layers every 2 bars for a rising feel",
-      "Switch to half-time for 8 bars then slam back",
-      "Remove bass for one phrase to create tension",
-      "Filter sweep the whole mix down then open on drop",
-      "Add an extra percussion layer only in the high-energy section"
-    ];
-
-    var arrDrumsArr = [
-      "Alternate between two slightly different grooves every 4 bars",
-      "Add hat variations only on the last bar of each phrase",
-      "Use tom fills as transitions into new sections",
-      "Change clap pattern in the B-section for contrast",
-      "Mute all tops and leave only kick + sub for a minimal passage",
-      "Bring in a new percussion motif in the second half of the track"
-    ];
-
-    var arrHarmony = [
-      "Add a simple 2-note counter-melody on top of the chords",
-      "Change one chord in the progression for the B-section",
-      "Move pad voicings up an octave in the more intense section",
-      "Introduce a call-and-response motif between two instruments",
-      "Add a pedal tone in the bass during the breakdown",
-      "Use a modal shift (borrowed chord) for 4 bars as a surprise"
-    ];
-
-    var arrTransition = [
-      "Noise sweep + drum fill into the new section",
-      "Silence on the last half-beat before the drop",
-      "Reverse reverb into the first hit of the next phrase",
-      "Tape stop effect on the master for one beat",
-      "Gradual HP filter on drums then sudden release",
-      "Stutter the last beat of the bar into the next section"
-    ];
-
+    // Arrangement
     function generateArrangement() {
-      document.getElementById("arr-section").textContent = pickRandom(arrSection);
-      document.getElementById("arr-energy").textContent = pickRandom(arrEnergy);
-      document.getElementById("arr-drums").textContent = pickRandom(arrDrumsArr);
-      document.getElementById("arr-harmony").textContent = pickRandom(arrHarmony);
-      document.getElementById("arr-transition").textContent = pickRandom(arrTransition);
+      if (!isLocked("arr-section"))
+        document.getElementById("arr-section").textContent = pickFromDeck("arr-section");
+      if (!isLocked("arr-energy"))
+        document.getElementById("arr-energy").textContent = pickFromDeck("arr-energy");
+      if (!isLocked("arr-drums"))
+        document.getElementById("arr-drums").textContent = pickFromDeck("arr-drums");
+      if (!isLocked("arr-harmony"))
+        document.getElementById("arr-harmony").textContent = pickFromDeck("arr-harmony");
+      if (!isLocked("arr-transition"))
+        document.getElementById("arr-transition").textContent = pickFromDeck("arr-transition");
       document.getElementById("arrange-status").textContent = "";
     }
 
@@ -815,58 +1392,18 @@
       document.getElementById("arrange-status").textContent = "Export updated.";
     }
 
-    // ----- Workflow Generator -----
-    var wfWarmup = [
-      "5–10 minutes of sound design: create one new preset",
-      "Program a simple 4-bar drum loop from scratch",
-      "Jam on your MIDI keyboard to a drone in one key",
-      "Tidy your sample folders for 5 minutes",
-      "Recreate a drum groove from a reference track by ear",
-      "Practice a scale or mode over a metronome"
-    ];
-
-    var wfCore = [
-      "Extend one 8-bar loop into a 32-bar structure",
-      "Write a brand new 8-bar idea with drums, bass, and one lead",
-      "Replace all drums in an old project with a new kit",
-      "Focus on basslines: write 3 different bass ideas for one groove",
-      "Turn one sketch into a rough full arrangement",
-      "Create a full set of fills for one track"
-    ];
-
-    var wfSkill = [
-      "Practice EQ moves on drums using a reference",
-      "Study and recreate the sidechain feel from a favourite track",
-      "Watch one short tutorial and immediately apply the idea",
-      "Practice comping and voice-leading on chords for 10 minutes",
-      "Create 3 different FX chains for one sound",
-      "Do a quick ear-training session (intervals, chords, or rhythms)"
-    ];
-
-    var wfFinish = [
-      "Name and colour all tracks in your current project",
-      "Bounce a rough mix and take quick notes on improvements",
-      "Clean up unused channels and samples in one project",
-      "Organise your “ideas” folder and star your 3 favourites",
-      "Write a short description of the vibe and reference tracks",
-      "Commit to either finishing or archiving one old idea"
-    ];
-
-    var wfReflect = [
-      "Write 2–3 sentences about what worked well today",
-      "Note one thing to try differently next session",
-      "List one technical skill and one musical skill to improve",
-      "Capture one sentence about the emotional feel of your best idea",
-      "Give the session a rating out of 10 and why",
-      "Write down one tiny win you’re proud of"
-    ];
-
+    // Workflow
     function generateWorkflow() {
-      document.getElementById("wf-warmup").textContent = pickRandom(wfWarmup);
-      document.getElementById("wf-core").textContent = pickRandom(wfCore);
-      document.getElementById("wf-skill").textContent = pickRandom(wfSkill);
-      document.getElementById("wf-finish").textContent = pickRandom(wfFinish);
-      document.getElementById("wf-reflect").textContent = pickRandom(wfReflect);
+      if (!isLocked("wf-warmup"))
+        document.getElementById("wf-warmup").textContent = pickFromDeck("wf-warmup");
+      if (!isLocked("wf-core"))
+        document.getElementById("wf-core").textContent = pickFromDeck("wf-core");
+      if (!isLocked("wf-skill"))
+        document.getElementById("wf-skill").textContent = pickFromDeck("wf-skill");
+      if (!isLocked("wf-finish"))
+        document.getElementById("wf-finish").textContent = pickFromDeck("wf-finish");
+      if (!isLocked("wf-reflect"))
+        document.getElementById("wf-reflect").textContent = pickFromDeck("wf-reflect");
       document.getElementById("workflow-status").textContent = "";
     }
 
@@ -883,13 +1420,133 @@
       document.getElementById("workflow-status").textContent = "Export updated.";
     }
 
-    // ----- Initial generation -----
-    generateFill();        // so first tab has content
-    generateGroove();
-    generatePalette();
-    generateTexture();
-    generateArrangement();
-    generateWorkflow();
+    // FX Chains
+    function generateFx() {
+      if (!isLocked("fx-target"))
+        document.getElementById("fx-target").textContent = pickFromDeck("fx-target");
+      if (!isLocked("fx-core"))
+        document.getElementById("fx-core").textContent = pickFromDeck("fx-core");
+      if (!isLocked("fx-mod"))
+        document.getElementById("fx-mod").textContent = pickFromDeck("fx-mod");
+      if (!isLocked("fx-space"))
+        document.getElementById("fx-space").textContent = pickFromDeck("fx-space");
+      if (!isLocked("fx-sauce"))
+        document.getElementById("fx-sauce").textContent = pickFromDeck("fx-sauce");
+      document.getElementById("fx-status").textContent = "";
+    }
+
+    function exportFx() {
+      var lines = [
+        "FX Chain:",
+        "- Target: " + (document.getElementById("fx-target").textContent || "(none)"),
+        "- Core Processors: " + (document.getElementById("fx-core").textContent || "(none)"),
+        "- Movement / Mod: " + (document.getElementById("fx-mod").textContent || "(none)"),
+        "- Space: " + (document.getElementById("fx-space").textContent || "(none)"),
+        "- Special Sauce: " + (document.getElementById("fx-sauce").textContent || "(none)")
+      ];
+      document.getElementById("fx-export").value = lines.join("\n");
+      document.getElementById("fx-status").textContent = "Export updated.";
+    }
+
+    // Constraints
+    function generateConstraints() {
+      if (!isLocked("cc-time"))
+        document.getElementById("cc-time").textContent = pickFromDeck("cc-time");
+      if (!isLocked("cc-scope"))
+        document.getElementById("cc-scope").textContent = pickFromDeck("cc-scope");
+      if (!isLocked("cc-palette"))
+        document.getElementById("cc-palette").textContent = pickFromDeck("cc-palette");
+      if (!isLocked("cc-arrange"))
+        document.getElementById("cc-arrange").textContent = pickFromDeck("cc-arrange");
+      if (!isLocked("cc-workflow"))
+        document.getElementById("cc-workflow").textContent = pickFromDeck("cc-workflow");
+      document.getElementById("constraints-status").textContent = "";
+    }
+
+    function exportConstraints() {
+      var lines = [
+        "Creative Constraints:",
+        "- Time Box: " + (document.getElementById("cc-time").textContent || "(none)"),
+        "- Track Scope: " + (document.getElementById("cc-scope").textContent || "(none)"),
+        "- Palette Restriction: " + (document.getElementById("cc-palette").textContent || "(none)"),
+        "- Arrangement Rule: " + (document.getElementById("cc-arrange").textContent || "(none)"),
+        "- Workflow Constraint: " + (document.getElementById("cc-workflow").textContent || "(none)")
+      ];
+      document.getElementById("constraints-export").value = lines.join("\n");
+      document.getElementById("constraints-status").textContent = "Export updated.";
+    }
+
+    // ---------- Deck Editor ----------
+    function initDeckEditor() {
+      var select = document.getElementById("deck-select");
+      select.innerHTML = "";
+
+      Object.keys(DECK_META).forEach(function (key) {
+        var opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = DECK_META[key];
+        select.appendChild(opt);
+      });
+
+      loadDeckIntoEditor();
+    }
+
+    function loadDeckIntoEditor() {
+      var select = document.getElementById("deck-select");
+      var deckId = select.value;
+      var textArea = document.getElementById("deck-editor-text");
+      var status = document.getElementById("deck-editor-status");
+
+      var list = decks[deckId] || [];
+      textArea.value = list.join("\n");
+      status.textContent = "";
+    }
+
+    function saveDeckFromEditor() {
+      var select = document.getElementById("deck-select");
+      var deckId = select.value;
+      var textArea = document.getElementById("deck-editor-text");
+      var status = document.getElementById("deck-editor-status");
+
+      var lines = textArea.value.split("\n").map(function (l) {
+        return l.trim();
+      }).filter(function (l) {
+        return l.length > 0;
+      });
+
+      decks[deckId] = lines;
+      saveDecks();
+      status.textContent = "Saved. Generators will use this updated deck.";
+    }
+
+    function resetDeckFromEditor() {
+      var select = document.getElementById("deck-select");
+      var deckId = select.value;
+      var status = document.getElementById("deck-editor-status");
+
+      decks[deckId] = DEFAULT_DECKS[deckId].slice();
+      saveDecks();
+      loadDeckIntoEditor();
+      status.textContent = "Deck reset to default.";
+    }
+
+    // ---------- Init ----------
+    document.addEventListener("DOMContentLoaded", function () {
+      initTheme();
+      loadDecks();
+      initTabs();
+      initDeckEditor();
+
+      // Seed all tabs once
+      generateFill();
+      generateGroove();
+      generatePalette();
+      generateTexture();
+      generateArrangement();
+      generateWorkflow();
+      generateFx();
+      generateConstraints();
+    });
   </script>
 </body>
 </html>
