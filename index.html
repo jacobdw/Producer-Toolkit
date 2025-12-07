@@ -140,15 +140,38 @@
       display: block;
     }
 
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
     h2 {
       font-size: 1.1rem;
-      margin: 0 0 6px;
+      margin: 0;
     }
 
     .panel-description {
       font-size: 0.85rem;
       color: var(--text-muted);
       margin: 0 0 10px;
+    }
+
+    .help-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff10;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 3px 7px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .help-btn:hover {
+      background: #ffffff20;
     }
 
     button {
@@ -281,12 +304,52 @@
       font-size: 0.85rem;
     }
 
+    .session-profile-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 6px 0 6px;
+      font-size: 0.85rem;
+    }
+
+    /* Quick Roll floating button */
+    .quick-roll {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 1.1rem;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+
+    .quick-roll:hover {
+      filter: brightness(0.96);
+    }
+
+    .quick-roll-label {
+      font-size: 0.75rem;
+      margin-left: 4px;
+    }
+
     @media (max-width: 600px) {
       body {
         padding-top: 18px;
       }
       h1 {
         font-size: 1.5rem;
+      }
+      .quick-roll {
+        bottom: 12px;
+        right: 12px;
+      }
+      .quick-roll-label {
+        display: none;
       }
     }
   </style>
@@ -295,7 +358,7 @@
   <header>
     <div class="header-left">
       <h1>Producer Toolkit</h1>
-      <p class="subtitle">Tap a tab, hit generate, or use Session Mode to walk through a full flow.</p>
+      <p class="subtitle">Use Session Mode for guided flow, or dive into individual tabs.</p>
     </div>
     <button class="theme-toggle" id="theme-toggle" type="button">☀ Light</button>
   </header>
@@ -310,9 +373,6 @@
     </button>
     <button class="tab-button" data-tab="palette" onclick="showTab('palette')">
       <span class="icon">🎨</span><span>Sound Palette</span>
-    </button>
-    <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">
-      <span class="icon">🎲</span><span>Constraints</span>
     </button>
     <button class="tab-button" data-tab="groove" onclick="showTab('groove')">
       <span class="icon">🥁</span><span>Drum Grooves</span>
@@ -329,6 +389,9 @@
     <button class="tab-button" data-tab="fx" onclick="showTab('fx')">
       <span class="icon">🎛️</span><span>FX Chains</span>
     </button>
+    <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">
+      <span class="icon">🎲</span><span>Constraints</span>
+    </button>
     <button class="tab-button" data-tab="decks" onclick="showTab('decks')">
       <span class="icon">🗂️</span><span>Deck Editor</span>
     </button>
@@ -336,11 +399,23 @@
 
   <!-- SESSION MODE PANEL -->
   <section class="panel active" id="panel-session">
-    <h2>Session Mode</h2>
+    <div class="panel-header">
+      <h2>Session Mode</h2>
+      <button class="help-btn" type="button" onclick="showHelp('session')">❔ How to use</button>
+    </div>
     <p class="panel-description">
-      One button to run a full creative flow: workflow → palette → groove → textures → arrangement → FX → constraints.
-      You can tweak individual tabs afterwards and re-export.
+      Guided flows built from your decks. Choose a profile, run once, then live in the other tabs while you build.
     </p>
+
+    <div class="session-profile-row">
+      <label for="session-profile">Session profile:</label>
+      <select id="session-profile">
+        <option value="quick">Quick Sketch (idea sprint)</option>
+        <option value="deep">Deep Work (full flow)</option>
+        <option value="live">Live Jam / Performance Prep</option>
+      </select>
+    </div>
+
     <div class="export-row">
       <button class="primary" onclick="runSession()">Run Guided Session</button>
       <button onclick="exportSession()">Rebuild Summary Only</button>
@@ -352,13 +427,16 @@
     </div>
     <div class="status" id="session-status"></div>
     <p class="note">
-      Tip: Use Session Mode at the start of a session, then live in the individual tabs while you build the track.
+      Tip: Keyboard shortcuts – <strong>R</strong> = reroll current tab, <strong>E</strong> = re-export current tab.
     </p>
   </section>
 
   <!-- Drum Fill Generator -->
   <section class="panel" id="panel-fill">
-    <h2>Drum Fill Generator</h2>
+    <div class="panel-header">
+      <h2>Drum Fill Generator</h2>
+      <button class="help-btn" type="button" onclick="showHelp('fill')">❔ How to use</button>
+    </div>
     <p class="panel-description">Build fills from concepts instead of memorised patterns. Great for 1/4, 1/2 or 1-bar fills.</p>
     <button class="primary" onclick="generateFill()">Generate Drum Fill</button>
 
@@ -406,12 +484,15 @@
       <button onclick="copyText('fill-export','fill-status')">Copy</button>
     </div>
     <div class="status" id="fill-status"></div>
-    <p class="note">Try to commit to each combo for a few minutes before rerolling. Treat it like a mini game.</p>
+    <p class="note">Take your current 1–2 bar loop, duplicate the last bar, and apply this recipe there.</p>
   </section>
 
   <!-- Drum Groove Generator -->
   <section class="panel" id="panel-groove">
-    <h2>Drum Groove Generator</h2>
+    <div class="panel-header">
+      <h2>Drum Groove Generator</h2>
+      <button class="help-btn" type="button" onclick="showHelp('groove')">❔ How to use</button>
+    </div>
     <p class="panel-description">Design your core drum loop before touching samples. Especially good for organic house / downtempo.</p>
     <button class="primary" onclick="generateGroove()">Generate Groove</button>
 
@@ -463,7 +544,10 @@
 
   <!-- Sound Palette Generator -->
   <section class="panel" id="panel-palette">
-    <h2>Sound Palette Generator</h2>
+    <div class="panel-header">
+      <h2>Sound Palette Generator</h2>
+      <button class="help-btn" type="button" onclick="showHelp('palette')">❔ How to use</button>
+    </div>
     <p class="panel-description">Choose the sonic identity of the track before you start. This stops endless preset browsing.</p>
     <button class="primary" onclick="generatePalette()">Generate Palette</button>
 
@@ -515,7 +599,10 @@
 
   <!-- Texture / Atmos Generator -->
   <section class="panel" id="panel-texture">
-    <h2>Texture / Atmos Generator</h2>
+    <div class="panel-header">
+      <h2>Texture / Atmos Generator</h2>
+      <button class="help-btn" type="button" onclick="showHelp('texture')">❔ How to use</button>
+    </div>
     <p class="panel-description">For evolving pads, noise beds, and risers built from everyday sounds.</p>
     <button class="primary" onclick="generateTexture()">Generate Texture Plan</button>
 
@@ -567,7 +654,10 @@
 
   <!-- Arrangement Expander -->
   <section class="panel" id="panel-arrange">
-    <h2>Arrangement Expander</h2>
+    <div class="panel-header">
+      <h2>Arrangement Expander</h2>
+      <button class="help-btn" type="button" onclick="showHelp('arrange')">❔ How to use</button>
+    </div>
     <p class="panel-description">When you’re stuck in an 8-bar loop, use this to decide how the track evolves.</p>
     <button class="primary" onclick="generateArrangement()">Generate Arrangement Move</button>
 
@@ -619,7 +709,10 @@
 
   <!-- Daily Workflow -->
   <section class="panel" id="panel-workflow">
-    <h2>Daily Studio Workflow</h2>
+    <div class="panel-header">
+      <h2>Daily Studio Workflow</h2>
+      <button class="help-btn" type="button" onclick="showHelp('workflow')">❔ How to use</button>
+    </div>
     <p class="panel-description">A mini “training session” generator for when you sit down to make music and don’t know where to start.</p>
     <button class="primary" onclick="generateWorkflow()">Generate Today’s Session</button>
 
@@ -671,7 +764,10 @@
 
   <!-- FX Chains -->
   <section class="panel" id="panel-fx">
-    <h2>FX Chain Generator</h2>
+    <div class="panel-header">
+      <h2>FX Chain Generator</h2>
+      <button class="help-btn" type="button" onclick="showHelp('fx')">❔ How to use</button>
+    </div>
     <p class="panel-description">Generate FX chains for different roles (drums, bass, leads, atmospheres) to explore new tones.</p>
     <button class="primary" onclick="generateFx()">Generate FX Chain</button>
 
@@ -723,7 +819,10 @@
 
   <!-- Creative Constraints -->
   <section class="panel" id="panel-constraints">
-    <h2>Creative Constraints</h2>
+    <div class="panel-header">
+      <h2>Creative Constraints</h2>
+      <button class="help-btn" type="button" onclick="showHelp('constraints')">❔ How to use</button>
+    </div>
     <p class="panel-description">Use limitations as prompts: time, palette, arrangement, workflow.</p>
     <button class="primary" onclick="generateConstraints()">Generate Constraints</button>
 
@@ -775,7 +874,10 @@
 
   <!-- Deck Editor -->
   <section class="panel" id="panel-decks">
-    <h2>Deck Editor</h2>
+    <div class="panel-header">
+      <h2>Deck Editor</h2>
+      <button class="help-btn" type="button" onclick="showHelp('decks')">❔ How to use</button>
+    </div>
     <p class="panel-description">
       Edit the idea lists used by all generators. Changes are saved locally on this device and won’t affect other machines.
     </p>
@@ -791,8 +893,25 @@
       <button onclick="resetDeckFromEditor()">Reset to Default</button>
     </div>
     <div class="status" id="deck-editor-status"></div>
-    <p class="note">Tip: write entries as short instructions, like advice to future-you.</p>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+
+    <p class="panel-description">
+      Backup / share your decks: export to JSON, paste into Notes, or import on another device.
+    </p>
+    <textarea id="deck-backup-text" placeholder="Click 'Export All Decks' to get JSON here, or paste JSON here and click 'Import Decks'."></textarea>
+    <div class="export-row">
+      <button onclick="exportAllDecks()">Export All Decks</button>
+      <button onclick="importAllDecks()">Import Decks</button>
+    </div>
+    <div class="status" id="deck-backup-status"></div>
+    <p class="note">Tip: keep a copy of this JSON in your files so you never lose your favourite prompts.</p>
   </section>
+
+  <!-- Quick Roll floating button -->
+  <button type="button" class="quick-roll" onclick="quickRoll()">
+    🎲<span class="quick-roll-label"> Reroll</span>
+  </button>
 
   <script>
     // ---------- Utility ----------
@@ -860,7 +979,11 @@
     }
 
     // Tabs with persistence
+    let currentTab = "session";
+
     function showTab(name) {
+      currentTab = name;
+
       var buttons = document.querySelectorAll(".tab-button");
       buttons.forEach(function (btn) {
         btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
@@ -883,6 +1006,35 @@
       } catch (e) {}
       var initial = saved || "session";
       showTab(initial);
+    }
+
+    // Help texts
+    const HELP_TEXT = {
+      session:
+        "Session Mode:\n\n1) Choose a profile.\n- Quick Sketch: workflow + palette + groove.\n- Deep Work: full flow across all sections.\n- Live Jam: groove + fills + FX + constraints.\n\n2) Click 'Run Guided Session'.\n3) Use the summary as your plan, and tweak details in each tab.\n4) Click 'Rebuild Summary Only' after edits.",
+      fill:
+        "Drum Fills:\n\n1) Take your current loop and duplicate the last bar.\n2) Hit 'Generate Drum Fill'.\n3) Apply each card concept to that last bar (structure, rate, timbre, space, FX).\n4) Lock any card you like, reroll the rest.\n5) Use 'Export Fill Recipe' to store the idea in project notes.",
+      groove:
+        "Drum Grooves:\n\n1) Start a new beat with no fills.\n2) Hit 'Generate Groove'.\n3) Program the kick, snare, hats, and perc following each card.\n4) Use 'Human Feel' last: micro-timing, velocities.\n5) Once the core groove feels good, then go to Fills / FX.",
+      palette:
+        "Sound Palette:\n\n1) Hit 'Generate Palette' before diving into presets.\n2) Choose sounds in your synths/drums that match each card.\n3) Try to stick to this palette for the whole track to keep identity strong.\n4) Export and paste into the project’s notes as a reference.",
+      texture:
+        "Textures / Atmos:\n\n1) Pick or record a source matching 'Source Material'.\n2) Follow 'Time Manipulation' and 'Processing Chain' to turn it into a pad/bed.\n3) Automate 'Movement' slowly over many bars.\n4) Place it according to 'Role in Track' (background bed, riser, glue, etc.).",
+      arrange:
+        "Arrangement:\n\n1) Take your 8–16 bar loop.\n2) Hit 'Generate Arrangement Move'.\n3) Apply 'Section Change' and 'Energy Shift' first to create A/B sections.\n4) Use 'Drum Variation' and 'Transition Trick' at section boundaries.\n5) Export the plan as a TODO list and tick items off.",
+      workflow:
+        "Daily Workflow:\n\n1) Hit 'Generate Today’s Session' at the start of your day.\n2) Follow the cards in order: warm-up → core → skill → finishing → reflection.\n3) Treat it like a mini practice plan, not a rulebook.\n4) If you love the plan, export it and do a similar one next time.",
+      fx:
+        "FX Chains:\n\n1) Choose a channel/bus that needs character.\n2) Hit 'Generate FX Chain'.\n3) Build the chain in your DAW in the same order: target → core → movement → space → special sauce.\n4) Tweak to taste, then save as a preset if it works.",
+      constraints:
+        "Constraints:\n\n1) Generate constraints when you feel stuck or overwhelmed.\n2) Actually commit to them for one session (time, scope, palette, arrangement, workflow).\n3) Export and keep them visible while working.\n4) You can relax them next session if needed.",
+      decks:
+        "Deck Editor:\n\n1) Choose a deck, edit the lines (one option per line).\n2) Click 'Save Changes' to update generators.\n3) 'Reset to Default' restores my original suggestions.\n4) Use 'Export All Decks' to back up or share your prompts.\n5) Paste JSON and click 'Import Decks' on another device to sync."
+    };
+
+    function showHelp(key) {
+      const msg = HELP_TEXT[key] || "No help text defined for this section yet.";
+      alert(msg);
     }
 
     // ---------- Decks (single source of truth) ----------
@@ -1307,7 +1459,12 @@
     function pickFromDeck(deckId) {
       const list = decks[deckId] || [];
       if (!list.length) return "(no options defined)";
-      return pickRandom(list);
+      return pickFromDeckArray(list);
+    }
+
+    // to avoid name shadowing:
+    function pickFromDeckArray(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
     }
 
     // ---------- Generators & Exports ----------
@@ -1537,15 +1694,36 @@
     }
 
     // ---------- Session Mode ----------
+    function getSessionProfile() {
+      var sel = document.getElementById("session-profile");
+      return sel ? sel.value : "quick";
+    }
+
     function runSession() {
-      // Generate in a sensible order
-      generateWorkflow();
-      generatePalette();
-      generateGroove();
-      generateTexture();
-      generateArrangement();
-      generateFx();
-      generateConstraints();
+      const profile = getSessionProfile();
+
+      if (profile === "quick") {
+        // Quick Sketch: focus on starting ideas
+        generateWorkflow();
+        generatePalette();
+        generateGroove();
+      } else if (profile === "deep") {
+        // Deep Work: full flow
+        generateWorkflow();
+        generatePalette();
+        generateGroove();
+        generateFill();
+        generateTexture();
+        generateArrangement();
+        generateFx();
+        generateConstraints();
+      } else if (profile === "live") {
+        // Live Jam / Performance: beat + fills + FX + constraints
+        generateGroove();
+        generateFill();
+        generateFx();
+        generateConstraints();
+      }
 
       exportSession();
       document.getElementById("session-status").textContent =
@@ -1553,24 +1731,30 @@
     }
 
     function exportSession() {
+      const profile = getSessionProfile();
       var lines = [];
 
-      lines.push("=== DAILY WORKFLOW ===");
-      lines.push("- Warm-Up: " + (document.getElementById("wf-warmup").textContent || "(none)"));
-      lines.push("- Core Creation: " + (document.getElementById("wf-core").textContent || "(none)"));
-      lines.push("- Skill Practice: " + (document.getElementById("wf-skill").textContent || "(none)"));
-      lines.push("- Finishing / Admin: " + (document.getElementById("wf-finish").textContent || "(none)"));
-      lines.push("- Reflection: " + (document.getElementById("wf-reflect").textContent || "(none)"));
-      lines.push("");
+      if (profile === "quick" || profile === "deep") {
+        lines.push("=== DAILY WORKFLOW ===");
+        lines.push("- Warm-Up: " + (document.getElementById("wf-warmup").textContent || "(none)"));
+        lines.push("- Core Creation: " + (document.getElementById("wf-core").textContent || "(none)"));
+        lines.push("- Skill Practice: " + (document.getElementById("wf-skill").textContent || "(none)"));
+        lines.push("- Finishing / Admin: " + (document.getElementById("wf-finish").textContent || "(none)"));
+        lines.push("- Reflection: " + (document.getElementById("wf-reflect").textContent || "(none)"));
+        lines.push("");
+      }
 
-      lines.push("=== SOUND PALETTE ===");
-      lines.push("- Lead: " + (document.getElementById("pal-lead").textContent || "(none)"));
-      lines.push("- Bass: " + (document.getElementById("pal-bass").textContent || "(none)"));
-      lines.push("- Drums: " + (document.getElementById("pal-drums").textContent || "(none)"));
-      lines.push("- FX & Space: " + (document.getElementById("pal-fx").textContent || "(none)"));
-      lines.push("- Ambient Bed: " + (document.getElementById("pal-bed").textContent || "(none)"));
-      lines.push("");
+      if (profile === "quick" || profile === "deep") {
+        lines.push("=== SOUND PALETTE ===");
+        lines.push("- Lead: " + (document.getElementById("pal-lead").textContent || "(none)"));
+        lines.push("- Bass: " + (document.getElementById("pal-bass").textContent || "(none)"));
+        lines.push("- Drums: " + (document.getElementById("pal-drums").textContent || "(none)"));
+        lines.push("- FX & Space: " + (document.getElementById("pal-fx").textContent || "(none)"));
+        lines.push("- Ambient Bed: " + (document.getElementById("pal-bed").textContent || "(none)"));
+        lines.push("");
+      }
 
+      // Groove is core for all profiles
       lines.push("=== DRUM GROOVE ===");
       lines.push("- Kick: " + (document.getElementById("groove-kick").textContent || "(none)"));
       lines.push("- Snare / Clap: " + (document.getElementById("groove-snare").textContent || "(none)"));
@@ -1579,36 +1763,52 @@
       lines.push("- Human Feel: " + (document.getElementById("groove-human").textContent || "(none)"));
       lines.push("");
 
-      lines.push("=== TEXTURE / ATMOS ===");
-      lines.push("- Source: " + (document.getElementById("tex-source").textContent || "(none)"));
-      lines.push("- Time Manipulation: " + (document.getElementById("tex-time").textContent || "(none)"));
-      lines.push("- Movement: " + (document.getElementById("tex-move").textContent || "(none)"));
-      lines.push("- Processing Chain: " + (document.getElementById("tex-chain").textContent || "(none)"));
-      lines.push("- Role: " + (document.getElementById("tex-role").textContent || "(none)"));
-      lines.push("");
+      if (profile === "deep" || profile === "live") {
+        lines.push("=== DRUM FILLS ===");
+        lines.push("- Structure: " + (document.getElementById("fill-structure").textContent || "(none)"));
+        lines.push("- Rate / Rhythm: " + (document.getElementById("fill-rate").textContent || "(none)"));
+        lines.push("- Timbre: " + (document.getElementById("fill-timbre").textContent || "(none)"));
+        lines.push("- Space / Density: " + (document.getElementById("fill-space").textContent || "(none)"));
+        lines.push("- FX: " + (document.getElementById("fill-fx").textContent || "(none)"));
+        lines.push("");
+      }
 
-      lines.push("=== ARRANGEMENT PLAN ===");
-      lines.push("- Section Change: " + (document.getElementById("arr-section").textContent || "(none)"));
-      lines.push("- Energy Shift: " + (document.getElementById("arr-energy").textContent || "(none)"));
-      lines.push("- Drum Variation: " + (document.getElementById("arr-drums").textContent || "(none)"));
-      lines.push("- Harmony / Melody: " + (document.getElementById("arr-harmony").textContent || "(none)"));
-      lines.push("- Transition Trick: " + (document.getElementById("arr-transition").textContent || "(none)"));
-      lines.push("");
+      if (profile === "deep") {
+        lines.push("=== TEXTURE / ATMOS ===");
+        lines.push("- Source: " + (document.getElementById("tex-source").textContent || "(none)"));
+        lines.push("- Time Manipulation: " + (document.getElementById("tex-time").textContent || "(none)"));
+        lines.push("- Movement: " + (document.getElementById("tex-move").textContent || "(none)"));
+        lines.push("- Processing Chain: " + (document.getElementById("tex-chain").textContent || "(none)"));
+        lines.push("- Role: " + (document.getElementById("tex-role").textContent || "(none)"));
+        lines.push("");
 
-      lines.push("=== FX CHAIN ===");
-      lines.push("- Target: " + (document.getElementById("fx-target").textContent || "(none)"));
-      lines.push("- Core Processors: " + (document.getElementById("fx-core").textContent || "(none)"));
-      lines.push("- Movement / Mod: " + (document.getElementById("fx-mod").textContent || "(none)"));
-      lines.push("- Space: " + (document.getElementById("fx-space").textContent || "(none)"));
-      lines.push("- Special Sauce: " + (document.getElementById("fx-sauce").textContent || "(none)"));
-      lines.push("");
+        lines.push("=== ARRANGEMENT PLAN ===");
+        lines.push("- Section Change: " + (document.getElementById("arr-section").textContent || "(none)"));
+        lines.push("- Energy Shift: " + (document.getElementById("arr-energy").textContent || "(none)"));
+        lines.push("- Drum Variation: " + (document.getElementById("arr-drums").textContent || "(none)"));
+        lines.push("- Harmony / Melody: " + (document.getElementById("arr-harmony").textContent || "(none)"));
+        lines.push("- Transition Trick: " + (document.getElementById("arr-transition").textContent || "(none)"));
+        lines.push("");
+      }
 
-      lines.push("=== CREATIVE CONSTRAINTS ===");
-      lines.push("- Time Box: " + (document.getElementById("cc-time").textContent || "(none)"));
-      lines.push("- Track Scope: " + (document.getElementById("cc-scope").textContent || "(none)"));
-      lines.push("- Palette Restriction: " + (document.getElementById("cc-palette").textContent || "(none)"));
-      lines.push("- Arrangement Rule: " + (document.getElementById("cc-arrange").textContent || "(none)"));
-      lines.push("- Workflow Constraint: " + (document.getElementById("cc-workflow").textContent || "(none)"));
+      if (profile === "deep" || profile === "live") {
+        lines.push("=== FX CHAIN ===");
+        lines.push("- Target: " + (document.getElementById("fx-target").textContent || "(none)"));
+        lines.push("- Core Processors: " + (document.getElementById("fx-core").textContent || "(none)"));
+        lines.push("- Movement / Mod: " + (document.getElementById("fx-mod").textContent || "(none)"));
+        lines.push("- Space: " + (document.getElementById("fx-space").textContent || "(none)"));
+        lines.push("- Special Sauce: " + (document.getElementById("fx-sauce").textContent || "(none)"));
+        lines.push("");
+      }
+
+      if (profile === "deep" || profile === "live") {
+        lines.push("=== CREATIVE CONSTRAINTS ===");
+        lines.push("- Time Box: " + (document.getElementById("cc-time").textContent || "(none)"));
+        lines.push("- Track Scope: " + (document.getElementById("cc-scope").textContent || "(none)"));
+        lines.push("- Palette Restriction: " + (document.getElementById("cc-palette").textContent || "(none)"));
+        lines.push("- Arrangement Rule: " + (document.getElementById("cc-arrange").textContent || "(none)"));
+        lines.push("- Workflow Constraint: " + (document.getElementById("cc-workflow").textContent || "(none)"));
+      }
 
       document.getElementById("session-export").value = lines.join("\n");
       document.getElementById("session-status").textContent = "Session summary updated.";
@@ -1668,6 +1868,135 @@
       status.textContent = "Deck reset to default.";
     }
 
+    // Backup / Import all decks
+    function exportAllDecks() {
+      var area = document.getElementById("deck-backup-text");
+      var status = document.getElementById("deck-backup-status");
+
+      try {
+        area.value = JSON.stringify(decks, null, 2);
+        status.textContent = "All decks exported. Copy and save this JSON somewhere safe.";
+      } catch (e) {
+        status.textContent = "Failed to export decks.";
+      }
+    }
+
+    function importAllDecks() {
+      var area = document.getElementById("deck-backup-text");
+      var status = document.getElementById("deck-backup-status");
+      var text = area.value.trim();
+      if (!text) {
+        status.textContent = "Paste JSON into the box first.";
+        return;
+      }
+
+      try {
+        var parsed = JSON.parse(text);
+        var newDecks = {};
+
+        // Only accept known keys, ignore extras
+        for (const key in DEFAULT_DECKS) {
+          if (parsed[key] && Array.isArray(parsed[key])) {
+            newDecks[key] = parsed[key];
+          } else {
+            newDecks[key] = DEFAULT_DECKS[key].slice();
+          }
+        }
+
+        decks = newDecks;
+        saveDecks();
+        initDeckEditor();
+        status.textContent = "Decks imported. Generators now use the imported decks.";
+      } catch (e) {
+        status.textContent = "Import failed. Check that the JSON is valid.";
+      }
+    }
+
+    // ---------- Quick Roll & keyboard shortcuts ----------
+    function quickRoll() {
+      switch (currentTab) {
+        case "session":
+          runSession();
+          break;
+        case "workflow":
+          generateWorkflow();
+          break;
+        case "palette":
+          generatePalette();
+          break;
+        case "groove":
+          generateGroove();
+          break;
+        case "fill":
+          generateFill();
+          break;
+        case "texture":
+          generateTexture();
+          break;
+        case "arrange":
+          generateArrangement();
+          break;
+        case "fx":
+          generateFx();
+          break;
+        case "constraints":
+          generateConstraints();
+          break;
+        case "decks":
+          // nothing to reroll here
+          break;
+      }
+    }
+
+    function quickExport() {
+      switch (currentTab) {
+        case "session":
+          exportSession();
+          break;
+        case "workflow":
+          exportWorkflow();
+          break;
+        case "palette":
+          exportPalette();
+          break;
+        case "groove":
+          exportGroove();
+          break;
+        case "fill":
+          exportFill();
+          break;
+        case "texture":
+          exportTexture();
+          break;
+        case "arrange":
+          exportArrangement();
+          break;
+        case "fx":
+          exportFx();
+          break;
+        case "constraints":
+          exportConstraints();
+          break;
+        case "decks":
+          // no single export
+          break;
+      }
+    }
+
+    document.addEventListener("keydown", function (e) {
+      // Avoid triggering while typing in textareas/inputs
+      var tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+      if (tag === "textarea" || tag === "input" || e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        quickRoll();
+      } else if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        quickExport();
+      }
+    });
+
     // ---------- Init ----------
     document.addEventListener("DOMContentLoaded", function () {
       initTheme();
@@ -1675,10 +2004,11 @@
       initTabs();
       initDeckEditor();
 
-      // Seed all tabs once (so Session Mode can read something even before first click)
+      // Seed all tabs once so Session Mode can read something even before first click
       generateWorkflow();
       generatePalette();
       generateGroove();
+      generateFill();
       generateTexture();
       generateArrangement();
       generateFx();
