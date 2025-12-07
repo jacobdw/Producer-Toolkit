@@ -83,22 +83,15 @@
     }
 
     /* Tabs */
-    .tabs {
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      gap: 6px;
-      margin-bottom: 14px;
-      padding-bottom: 4px;
-    }
-
-    .tabs::-webkit-scrollbar {
-      height: 4px;
-    }
-    .tabs::-webkit-scrollbar-thumb {
-      background: #00000022;
-      border-radius: 999px;
-    }
+  .tabs {
+  display: flex;
+  flex-wrap: wrap;        /* allow wrapping to multiple rows */
+  overflow-x: visible;    /* no horizontal scrolling */
+  gap: 6px;
+  margin-bottom: 14px;
+  padding-bottom: 4px;
+  justify-content: flex-start;
+}
 
     .tab-button {
       border-radius: 999px;
@@ -125,6 +118,16 @@
       font-weight: 600;
     }
 
+    .tab-section-label {
+      flex-basis: 100%;               /* force label onto its own line */
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-top: 6px;
+      margin-bottom: -2px;
+     }
+    
     /* Panels */
     .panel {
       display: none;
@@ -364,38 +367,52 @@
   </header>
 
   <!-- Tab buttons with icons -->
-  <nav class="tabs">
-    <button class="tab-button active" data-tab="session" onclick="showTab('session')">
-      <span class="icon">🚀</span><span>Session Mode</span>
-    </button>
-    <button class="tab-button" data-tab="workflow" onclick="showTab('workflow')">
-      <span class="icon">🧭</span><span>Daily Workflow</span>
-    </button>
-    <button class="tab-button" data-tab="palette" onclick="showTab('palette')">
-      <span class="icon">🎨</span><span>Sound Palette</span>
-    </button>
-    <button class="tab-button" data-tab="groove" onclick="showTab('groove')">
-      <span class="icon">🥁</span><span>Drum Grooves</span>
-    </button>
-    <button class="tab-button" data-tab="fill" onclick="showTab('fill')">
-      <span class="icon">🎯</span><span>Drum Fills</span>
-    </button>
-    <button class="tab-button" data-tab="texture" onclick="showTab('texture')">
-      <span class="icon">🌫️</span><span>Textures / Atmos</span>
-    </button>
-    <button class="tab-button" data-tab="arrange" onclick="showTab('arrange')">
-      <span class="icon">🧱</span><span>Arrangement</span>
-    </button>
-    <button class="tab-button" data-tab="fx" onclick="showTab('fx')">
-      <span class="icon">🎛️</span><span>FX Chains</span>
-    </button>
-    <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">
-      <span class="icon">🎲</span><span>Constraints</span>
-    </button>
-    <button class="tab-button" data-tab="decks" onclick="showTab('decks')">
-      <span class="icon">🗂️</span><span>Deck Editor</span>
-    </button>
-  </nav>
+ <nav class="tabs">
+  <!-- Session -->
+  <span class="tab-section-label">Session</span>
+  <button class="tab-button active" data-tab="session" onclick="showTab('session')">
+    <span class="icon">🚀</span><span>Session Mode</span>
+  </button>
+  <button class="tab-button" data-tab="workflow" onclick="showTab('workflow')">
+    <span class="icon">🧭</span><span>Daily Workflow</span>
+  </button>
+
+  <!-- Drums -->
+  <span class="tab-section-label">Drums</span>
+  <button class="tab-button" data-tab="groove" onclick="showTab('groove')">
+    <span class="icon">🥁</span><span>Drum Grooves</span>
+  </button>
+  <button class="tab-button" data-tab="fill" onclick="showTab('fill')">
+    <span class="icon">🎯</span><span>Drum Fills</span>
+  </button>
+
+  <!-- Sound -->
+  <span class="tab-section-label">Sound</span>
+  <button class="tab-button" data-tab="palette" onclick="showTab('palette')">
+    <span class="icon">🎨</span><span>Sound Palette</span>
+  </button>
+  <button class="tab-button" data-tab="texture" onclick="showTab('texture')">
+    <span class="icon">🌫️</span><span>Textures / Atmos</span>
+  </button>
+  <button class="tab-button" data-tab="fx" onclick="showTab('fx')">
+    <span class="icon">🎛️</span><span>FX Chains</span>
+  </button>
+
+  <!-- Structure -->
+  <span class="tab-section-label">Structure</span>
+  <button class="tab-button" data-tab="arrange" onclick="showTab('arrange')">
+    <span class="icon">🧱</span><span>Arrangement</span>
+  </button>
+  <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">
+    <span class="icon">🎲</span><span>Constraints</span>
+  </button>
+
+  <!-- Library / Meta -->
+  <span class="tab-section-label">Library</span>
+  <button class="tab-button" data-tab="decks" onclick="showTab('decks')">
+    <span class="icon">🗂️</span><span>Deck Editor</span>
+  </button>
+</nav>
 
   <!-- SESSION MODE PANEL -->
   <section class="panel active" id="panel-session">
