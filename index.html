@@ -85,9 +85,19 @@
     /* Tabs */
     .tabs {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
       gap: 6px;
       margin-bottom: 14px;
+      padding-bottom: 4px;
+    }
+
+    .tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+    .tabs::-webkit-scrollbar-thumb {
+      background: #00000022;
+      border-radius: 999px;
     }
 
     .tab-button {
@@ -99,6 +109,13 @@
       color: var(--text-main);
       cursor: pointer;
       white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-button span.icon {
+      font-size: 1rem;
     }
 
     .tab-button.active {
@@ -278,27 +295,69 @@
   <header>
     <div class="header-left">
       <h1>Producer Toolkit</h1>
-      <p class="subtitle">Tap a tab, hit generate, and let the constraints shape the track.</p>
+      <p class="subtitle">Tap a tab, hit generate, or use Session Mode to walk through a full flow.</p>
     </div>
     <button class="theme-toggle" id="theme-toggle" type="button">☀ Light</button>
   </header>
 
-  <!-- Tab buttons -->
-<nav class="tabs">
-  <button class="tab-button active" data-tab="workflow" onclick="showTab('workflow')">Daily Workflow</button>
-  <button class="tab-button" data-tab="palette" onclick="showTab('palette')">Sound Palette</button>
-  <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">Constraints</button>
-  <button class="tab-button" data-tab="groove" onclick="showTab('groove')">Drum Grooves</button>
-  <button class="tab-button" data-tab="fill" onclick="showTab('fill')">Drum Fills</button>
-  <button class="tab-button" data-tab="texture" onclick="showTab('texture')">Textures / Atmos</button>
-  <button class="tab-button" data-tab="arrange" onclick="showTab('arrange')">Arrangement</button>
-  <button class="tab-button" data-tab="fx" onclick="showTab('fx')">FX Chains</button>
-  <button class="tab-button" data-tab="decks" onclick="showTab('decks')">Deck Editor</button>
-</nav>
+  <!-- Tab buttons with icons -->
+  <nav class="tabs">
+    <button class="tab-button active" data-tab="session" onclick="showTab('session')">
+      <span class="icon">🚀</span><span>Session Mode</span>
+    </button>
+    <button class="tab-button" data-tab="workflow" onclick="showTab('workflow')">
+      <span class="icon">🧭</span><span>Daily Workflow</span>
+    </button>
+    <button class="tab-button" data-tab="palette" onclick="showTab('palette')">
+      <span class="icon">🎨</span><span>Sound Palette</span>
+    </button>
+    <button class="tab-button" data-tab="groove" onclick="showTab('groove')">
+      <span class="icon">🥁</span><span>Drum Grooves</span>
+    </button>
+    <button class="tab-button" data-tab="fill" onclick="showTab('fill')">
+      <span class="icon">🎯</span><span>Drum Fills</span>
+    </button>
+    <button class="tab-button" data-tab="texture" onclick="showTab('texture')">
+      <span class="icon">🌫️</span><span>Textures / Atmos</span>
+    </button>
+    <button class="tab-button" data-tab="arrange" onclick="showTab('arrange')">
+      <span class="icon">🧱</span><span>Arrangement</span>
+    </button>
+    <button class="tab-button" data-tab="fx" onclick="showTab('fx')">
+      <span class="icon">🎛️</span><span>FX Chains</span>
+    </button>
+    <button class="tab-button" data-tab="constraints" onclick="showTab('constraints')">
+      <span class="icon">🎲</span><span>Constraints</span>
+    </button>
+    <button class="tab-button" data-tab="decks" onclick="showTab('decks')">
+      <span class="icon">🗂️</span><span>Deck Editor</span>
+    </button>
+  </nav>
 
+  <!-- SESSION MODE PANEL -->
+  <section class="panel active" id="panel-session">
+    <h2>Session Mode</h2>
+    <p class="panel-description">
+      One button to run a full creative flow: workflow → palette → groove → textures → arrangement → FX → constraints.
+      You can tweak individual tabs afterwards and re-export.
+    </p>
+    <div class="export-row">
+      <button class="primary" onclick="runSession()">Run Guided Session</button>
+      <button onclick="exportSession()">Rebuild Summary Only</button>
+    </div>
+
+    <textarea id="session-export" placeholder="Click “Run Guided Session” to generate a full-session summary here."></textarea>
+    <div class="export-row">
+      <button onclick="copyText('session-export','session-status')">Copy</button>
+    </div>
+    <div class="status" id="session-status"></div>
+    <p class="note">
+      Tip: Use Session Mode at the start of a session, then live in the individual tabs while you build the track.
+    </p>
+  </section>
 
   <!-- Drum Fill Generator -->
-  <section class="panel active" id="panel-fill">
+  <section class="panel" id="panel-fill">
     <h2>Drum Fill Generator</h2>
     <p class="panel-description">Build fills from concepts instead of memorised patterns. Great for 1/4, 1/2 or 1-bar fills.</p>
     <button class="primary" onclick="generateFill()">Generate Drum Fill</button>
@@ -822,7 +881,7 @@
       try {
         saved = localStorage.getItem("pt_tab");
       } catch (e) {}
-      var initial = saved || "fill";
+      var initial = saved || "session";
       showTab(initial);
     }
 
@@ -1477,6 +1536,84 @@
       document.getElementById("constraints-status").textContent = "Export updated.";
     }
 
+    // ---------- Session Mode ----------
+    function runSession() {
+      // Generate in a sensible order
+      generateWorkflow();
+      generatePalette();
+      generateGroove();
+      generateTexture();
+      generateArrangement();
+      generateFx();
+      generateConstraints();
+
+      exportSession();
+      document.getElementById("session-status").textContent =
+        "Session generated. Adjust individual tabs if you like, then hit “Rebuild Summary Only”.";
+    }
+
+    function exportSession() {
+      var lines = [];
+
+      lines.push("=== DAILY WORKFLOW ===");
+      lines.push("- Warm-Up: " + (document.getElementById("wf-warmup").textContent || "(none)"));
+      lines.push("- Core Creation: " + (document.getElementById("wf-core").textContent || "(none)"));
+      lines.push("- Skill Practice: " + (document.getElementById("wf-skill").textContent || "(none)"));
+      lines.push("- Finishing / Admin: " + (document.getElementById("wf-finish").textContent || "(none)"));
+      lines.push("- Reflection: " + (document.getElementById("wf-reflect").textContent || "(none)"));
+      lines.push("");
+
+      lines.push("=== SOUND PALETTE ===");
+      lines.push("- Lead: " + (document.getElementById("pal-lead").textContent || "(none)"));
+      lines.push("- Bass: " + (document.getElementById("pal-bass").textContent || "(none)"));
+      lines.push("- Drums: " + (document.getElementById("pal-drums").textContent || "(none)"));
+      lines.push("- FX & Space: " + (document.getElementById("pal-fx").textContent || "(none)"));
+      lines.push("- Ambient Bed: " + (document.getElementById("pal-bed").textContent || "(none)"));
+      lines.push("");
+
+      lines.push("=== DRUM GROOVE ===");
+      lines.push("- Kick: " + (document.getElementById("groove-kick").textContent || "(none)"));
+      lines.push("- Snare / Clap: " + (document.getElementById("groove-snare").textContent || "(none)"));
+      lines.push("- Hats / Tops: " + (document.getElementById("groove-hats").textContent || "(none)"));
+      lines.push("- Percussion: " + (document.getElementById("groove-perc").textContent || "(none)"));
+      lines.push("- Human Feel: " + (document.getElementById("groove-human").textContent || "(none)"));
+      lines.push("");
+
+      lines.push("=== TEXTURE / ATMOS ===");
+      lines.push("- Source: " + (document.getElementById("tex-source").textContent || "(none)"));
+      lines.push("- Time Manipulation: " + (document.getElementById("tex-time").textContent || "(none)"));
+      lines.push("- Movement: " + (document.getElementById("tex-move").textContent || "(none)"));
+      lines.push("- Processing Chain: " + (document.getElementById("tex-chain").textContent || "(none)"));
+      lines.push("- Role: " + (document.getElementById("tex-role").textContent || "(none)"));
+      lines.push("");
+
+      lines.push("=== ARRANGEMENT PLAN ===");
+      lines.push("- Section Change: " + (document.getElementById("arr-section").textContent || "(none)"));
+      lines.push("- Energy Shift: " + (document.getElementById("arr-energy").textContent || "(none)"));
+      lines.push("- Drum Variation: " + (document.getElementById("arr-drums").textContent || "(none)"));
+      lines.push("- Harmony / Melody: " + (document.getElementById("arr-harmony").textContent || "(none)"));
+      lines.push("- Transition Trick: " + (document.getElementById("arr-transition").textContent || "(none)"));
+      lines.push("");
+
+      lines.push("=== FX CHAIN ===");
+      lines.push("- Target: " + (document.getElementById("fx-target").textContent || "(none)"));
+      lines.push("- Core Processors: " + (document.getElementById("fx-core").textContent || "(none)"));
+      lines.push("- Movement / Mod: " + (document.getElementById("fx-mod").textContent || "(none)"));
+      lines.push("- Space: " + (document.getElementById("fx-space").textContent || "(none)"));
+      lines.push("- Special Sauce: " + (document.getElementById("fx-sauce").textContent || "(none)"));
+      lines.push("");
+
+      lines.push("=== CREATIVE CONSTRAINTS ===");
+      lines.push("- Time Box: " + (document.getElementById("cc-time").textContent || "(none)"));
+      lines.push("- Track Scope: " + (document.getElementById("cc-scope").textContent || "(none)"));
+      lines.push("- Palette Restriction: " + (document.getElementById("cc-palette").textContent || "(none)"));
+      lines.push("- Arrangement Rule: " + (document.getElementById("cc-arrange").textContent || "(none)"));
+      lines.push("- Workflow Constraint: " + (document.getElementById("cc-workflow").textContent || "(none)"));
+
+      document.getElementById("session-export").value = lines.join("\n");
+      document.getElementById("session-status").textContent = "Session summary updated.";
+    }
+
     // ---------- Deck Editor ----------
     function initDeckEditor() {
       var select = document.getElementById("deck-select");
@@ -1538,13 +1675,12 @@
       initTabs();
       initDeckEditor();
 
-      // Seed all tabs once
-      generateFill();
-      generateGroove();
+      // Seed all tabs once (so Session Mode can read something even before first click)
+      generateWorkflow();
       generatePalette();
+      generateGroove();
       generateTexture();
       generateArrangement();
-      generateWorkflow();
       generateFx();
       generateConstraints();
     });
